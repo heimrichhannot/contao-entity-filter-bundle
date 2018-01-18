@@ -1,0 +1,9 @@
+services:
+    huh.entity_filter.backend.entity_filter:
+        class: HeimrichHannot\EntityFilterBundle\Backend\EntityFilter
+        arguments:
+            - "@contao.framework"
+    huh.entity_filter.manager:
+        class: HeimrichHannot\EntityFilterBundle\Manager\Manager
+        arguments:
+            - "@contao.framework"
