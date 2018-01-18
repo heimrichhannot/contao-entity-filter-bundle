@@ -19,7 +19,7 @@
   },
   "autoload": {
     "psr-4": {
-      "HeimrichHannot\\EntityFilter\\": "src/"
+      "HeimrichHannot\\EntityFilterBundle\\": "src/"
     },
     "classmap": [
       "src/"
@@ -33,13 +33,13 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "HeimrichHannot\\EntityFilter\\Test\\": "tests/"
+      "HeimrichHannot\\EntityFilterBundle\\Test\\": "tests/"
     }
   },
   "config": {
     "preferred-install": "dist"
   },
   "extra": {
-    "contao-manager-plugin": "HeimrichHannot\\EntityFilter\\ContaoManager\\Plugin"
+    "contao-manager-plugin": "HeimrichHannot\\EntityFilterBundle\\ContaoManager\\Plugin"
   }
 }
