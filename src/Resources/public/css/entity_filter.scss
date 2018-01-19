@@ -26,6 +26,7 @@
             box-sizing: border-box;
             cursor: pointer;
             transition: background .2s ease;
+            margin-left: 0;
 
             &:hover {
               background: #eee;

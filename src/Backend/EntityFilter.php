@@ -8,7 +8,12 @@
 
 namespace HeimrichHannot\EntityFilterBundle\Backend;
 
+use Contao\Controller;
 use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
+use Contao\Database;
+use Contao\DataContainer;
+use Contao\Message;
+use Contao\StringUtil;
 use Contao\System;
 
 class EntityFilter extends \Backend
@@ -26,176 +31,194 @@ class EntityFilter extends \Backend
         $this->framework = $framework;
     }
 
-    public function getHeaderFieldsForDca($arrConfig, $objContext, $objDca)
+    public function getHeaderFieldsForDca(array $config, $context, DataContainer $dc)
     {
-        return $this->getHeaderFields($objDca, $objContext);
+        return $this->getHeaderFields($dc, $context);
     }
 
-    public function getItemsForDca($arrConfig, $objContext, $objDca)
+    public function getItemsForDca(array $config, $context, DataContainer $dc)
     {
-        return $this->getItems($objDca->table, $objDca->field, $objDca->activeRecord);
+        return $this->getItems($dc->table, $dc->field, $dc->activeRecord);
     }
 
-    public function getItems($strTable, $strField, $objActiveRecord)
+    public function getItems(string $table, string $field, $activeRecord)
     {
-        if (!$strTable || !$strField) {
+        if (!$table || !$field) {
             return [];
         }
 
-        \Controller::loadDataContainer($strTable);
-        \System::loadLanguageFile($strTable);
+        Controller::loadDataContainer($table);
+        System::loadLanguageFile($table);
 
-        $arrListDca = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
+        $listDca = $GLOBALS['TL_DCA'][$table]['fields'][$field];
 
-        if (isset($arrListDca['eval']['listWidget']['table'])) {
+        if (isset($listDca['eval']['listWidget']['table'])) {
             // build query
-            $strFilter = $arrListDca['eval']['listWidget']['filterField'];
+            $filter = $listDca['eval']['listWidget']['filterField'];
 
-            if (is_array($arrListDca['eval']['listWidget']['fields']) && !empty($arrListDca['eval']['listWidget']['fields'])) {
-                $strFields = implode(',', $arrListDca['eval']['listWidget']['fields']);
+            if (is_array($listDca['eval']['listWidget']['fields']) && !empty($listDca['eval']['listWidget']['fields'])) {
+                $fields = implode(',', $listDca['eval']['listWidget']['fields']);
             } else {
-                $strFields = '*';
+                $fields = '*';
             }
 
-            $strQuery = 'SELECT '.$strFields.' FROM '.$arrListDca['eval']['listWidget']['table'];
-            list($strWhere, $arrValues) = $this->computeSqlCondition(
-                deserialize($objActiveRecord->{$strFilter}, true),
-                $arrListDca['eval']['listWidget']['table']
+            $query = 'SELECT '.$fields.' FROM '.$listDca['eval']['listWidget']['table'];
+
+            list($where, $values) = $this->computeSqlCondition(
+                StringUtil::deserialize($activeRecord->{$filter}, true),
+                $listDca['eval']['listWidget']['table']
             );
 
             // get items
-            $arrItems = [];
+            $items = [];
 
             try {
-                $strQuery = $strQuery.($strWhere ? ' WHERE '.$strWhere : '');
+                $query = $query.($where ? ' WHERE '.$where : '');
 
-                $objItems = \Database::getInstance()->prepare($strQuery)->execute($arrValues);
-                if ($objItems->numRows > 0) {
-                    while ($objItems->next()) {
-                        $arrItems[] = $objItems->row();
+                $itemObjects = \Database::getInstance()->prepare($query)->execute($values);
+
+                if ($itemObjects->numRows > 0) {
+                    while ($itemObjects->next()) {
+                        $items[] = $itemObjects->row();
                     }
                 }
-            } catch (\Exception $objException) {
-                \Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['tl_entity_filter']['invalidSqlQuery'], $strQuery,
-                                           $objException->getMessage()));
+            } catch (\Exception $exception) {
+                Message::addError(
+                    sprintf(
+                        $GLOBALS['TL_LANG']['MSC']['tl_entity_filter']['invalidSqlQuery'],
+                        $query,
+                        $exception->getMessage()
+                    )
+                );
             }
 
-            return $arrItems;
+            return $items;
         }
 
-        throw new \Exception("No 'table' set in $strTable.$strField's eval array.");
+        throw new \Exception("No 'table' set in $table.$field's eval array.");
     }
 
-    public function countItems($strTable, $strField, $objActiveRecord)
+    public function countItems(string $table, string $field, $activeRecord)
     {
-        if (!$strTable || !$strField) {
+        if (!$table || !$field) {
             return false;
         }
 
-        \Controller::loadDataContainer($strTable);
-        \System::loadLanguageFile($strTable);
+        Controller::loadDataContainer($table);
+        System::loadLanguageFile($table);
 
-        $arrListDca = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
+        $listDca = $GLOBALS['TL_DCA'][$table]['fields'][$field];
 
-        if (isset($arrListDca['eval']['listWidget']['table'])) {
+        if (isset($listDca['eval']['listWidget']['table'])) {
             // build query
-            $strFilter = $arrListDca['eval']['listWidget']['filterField'];
+            $filter = $listDca['eval']['listWidget']['filterField'];
 
-            $strQuery = 'SELECT COUNT(*) AS count FROM '.$arrListDca['eval']['listWidget']['table'];
-            list($strWhere, $arrValues) = $this->computeSqlCondition(
-                deserialize($objActiveRecord->{$strFilter}, true),
-                $arrListDca['eval']['listWidget']['table']
+            $query = 'SELECT COUNT(*) AS count FROM '.$listDca['eval']['listWidget']['table'];
+
+            list($where, $values) = $this->computeSqlCondition(
+                deserialize($activeRecord->{$filter}, true),
+                $listDca['eval']['listWidget']['table']
             );
 
             // get items
-            $objItems = \Database::getInstance()->prepare($strQuery.($strWhere ? ' WHERE '.$strWhere : ''))->execute($arrValues);
+            $items = Database::getInstance()->prepare($query.($where ? ' WHERE '.$where : ''))->execute($values);
 
-            return $objItems->count;
+            return $items->count;
         }
 
-        throw new \Exception("No 'table' set in $strTable.$strField's eval array.");
+        throw new \Exception("No 'table' set in $table.$field's eval array.");
     }
 
-    public function getHeaderFields(\DataContainer $objDc, $objWidget)
+    public function getHeaderFields(DataContainer $dc, $widget)
     {
-        if (!($strTable = $objDc->table) || !($strField = $objDc->field)) {
+        if (!($table = $dc->table) || !($strField = $dc->field)) {
             return [];
         }
 
-        \Controller::loadDataContainer($strTable);
+        \Controller::loadDataContainer($table);
 
-        $arrDca = $GLOBALS['TL_DCA'][$strTable]['fields'][$objDc->field]['eval']['listWidget'];
-        $arrChildDca = $GLOBALS['TL_DCA'][$arrDca['table']];
+        $dca = $GLOBALS['TL_DCA'][$table]['fields'][$dc->field]['eval']['listWidget'];
+        $childDca = $GLOBALS['TL_DCA'][$dca['table']];
 
-        if (!isset($arrDca['fields']) || empty($arrDca['fields'])) {
-            throw new \Exception("No 'fields' set in $objDc->table.$objDc->field's eval array.");
+        if (!isset($dca['fields']) || empty($dca['fields'])) {
+            throw new \Exception("No 'fields' set in $dc->table.$dc->field's eval array.");
         }
 
         // add field labels
         return array_combine(
-            $arrDca['fields'],
+            $dca['fields'],
             array_map(
-                function ($val) use ($arrChildDca) {
-                    return $arrChildDca['fields'][$val]['label'][0] ?: $val;
+                function ($val) use ($childDca) {
+                    return $childDca['fields'][$val]['label'][0] ?: $val;
                 },
-                $arrDca['fields']
+                $dca['fields']
             )
         );
     }
 
-    public function getFieldsAsOptions(\DataContainer $objDc)
+    public function getFieldsAsOptions(DataContainer $dc)
     {
-        if (!($strTable = $objDc->table)) {
+        if (!($table = $dc->table)) {
             return [];
         }
 
-        \Controller::loadDataContainer($strTable);
+        Controller::loadDataContainer($table);
 
-        if (isset($GLOBALS['TL_DCA'][$strTable]['fields'][$objDc->field]['eval']['multiColumnEditor']['table'])) {
-            $strChildTable = $GLOBALS['TL_DCA'][$strTable]['fields'][$objDc->field]['eval']['multiColumnEditor']['table'];
+        if (isset($GLOBALS['TL_DCA'][$table]['fields'][$dc->field]['eval']['multiColumnEditor']['table'])) {
+            $childTable = $GLOBALS['TL_DCA'][$table]['fields'][$dc->field]['eval']['multiColumnEditor']['table'];
 
-            if (!$strChildTable) {
+            if (!$childTable) {
                 return [];
             }
 
-            $arrFields = System::getContainer()->get('huh.utils.dca')->getFields($strChildTable);
+            $fields = System::getContainer()->get('huh.utils.dca')->getFields($childTable);
 
             // add table to field values
             return array_combine(
                 array_map(
-                    function ($val) use ($strChildTable) {
-                        return $strChildTable.'.'.$val;
+                    function ($val) use ($childTable) {
+                        return $childTable.'.'.$val;
                     },
-                    array_keys($arrFields)
+                    array_keys($fields)
                 ),
-                array_values($arrFields)
+                array_values($fields)
             );
         } else {
-            throw new \Exception("No 'table' set in $objDc->table.$objDc->field's eval array.");
+            throw new \Exception("No 'table' set in $dc->table.$dc->field's eval array.");
         }
     }
 
     /**
-     * @param array $arrConditions The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
+     * @param array $conditions The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
      *
      * @return array Returns array($strCondition, $arrValues)
      */
-    public function computeSqlCondition(array $arrConditions, $strTable)
+    public function computeSqlCondition(array $conditions, string $table)
     {
-        $strCondition = '';
-        $arrValues = [];
+        $condition = '';
+        $values = [];
 
         // a condition can't start with a logical connective!
-        if (isset($arrCondition[0]['connective'])) {
-            $arrCondition[0]['connective'] = '';
+        if (isset($conditions[0]['connective'])) {
+            $conditions[0]['connective'] = '';
         }
 
-        foreach ($arrConditions as $arrCondition) {
-            list($strClause, $arrClauseValues) = QueryHelper::computeCondition($arrCondition['field'], $arrCondition['operator'], $arrCondition['value'], $strTable);
-            $strCondition .= ' '.$arrCondition['connective'].' '.($arrCondition['bracketLeft'] ? '(' : '').$strClause.($arrCondition['bracketRight'] ? ')' : '');
-            $arrValues = array_merge($arrValues, $arrClauseValues);
+        foreach ($conditions as $conditionArray) {
+            list(
+                $clause, $clauseValues
+                ) = System::getContainer()->get('huh.utils.database')->computeCondition(
+                $conditionArray['field'],
+                $conditionArray['operator'],
+                $conditionArray['value'],
+                $table
+            );
+
+            $condition .= ' '.$conditionArray['connective'].' '.($conditionArray['bracketLeft'] ? '(' : '').$clause
+                          .($conditionArray['bracketRight'] ? ')' : '');
+
+            $values = array_merge($values, $clauseValues);
         }
 
-        return [trim($strCondition), $arrValues];
+        return [trim($condition), $values];
     }
 }

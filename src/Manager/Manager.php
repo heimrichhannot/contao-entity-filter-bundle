@@ -8,7 +8,9 @@
 
 namespace HeimrichHannot\EntityFilterBundle\Manager;
 
+use Contao\Controller;
 use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
+use Contao\System;
 
 class Manager
 {
@@ -25,67 +27,67 @@ class Manager
         $this->framework = $framework;
     }
 
-    public static function addFilterToDca($strName, $strParentTable, $strChildTable)
+    public static function addFilterToDca(string $name, string $parentTable, string $childTable)
     {
-        \Controller::loadDataContainer($strParentTable);
-        \Controller::loadDataContainer('tl_entity_filter');
-        \System::loadLanguageFile('tl_entity_filter');
-        $arrDca = &$GLOBALS['TL_DCA'][$strParentTable];
+        Controller::loadDataContainer($parentTable);
+        Controller::loadDataContainer('tl_entity_filter');
+        System::loadLanguageFile('tl_entity_filter');
+        $dca = &$GLOBALS['TL_DCA'][$parentTable];
 
-        $arrDca['fields'][$strName] = [
-            'label' => &$GLOBALS['TL_LANG'][$strParentTable][$strName],
+        $dca['fields'][$name] = [
+            'label' => &$GLOBALS['TL_LANG'][$parentTable][$name],
             'exclude' => true,
             'inputType' => 'multiColumnEditor',
             'eval' => [
                 'multiColumnEditor' => [
                     'class' => 'entity-filter',
                     'fields' => $GLOBALS['TL_DCA']['tl_entity_filter']['fields'],
-                    'table' => $strChildTable,
+                    'table' => $childTable,
                 ],
             ],
             'sql' => 'blob NULL',
         ];
     }
 
-    public static function addListToDca($strName, $strParentTable, $strFilterFieldname, $strChildTable, $arrFields = [])
+    public function addListToDca(string $name, string $parentTable, string $filterFieldname, string $childTable, array $fields = [])
     {
-        \Controller::loadDataContainer($strParentTable);
-        $arrDca = &$GLOBALS['TL_DCA'][$strParentTable];
+        Controller::loadDataContainer($parentTable);
+        $dca = &$GLOBALS['TL_DCA'][$parentTable];
 
-        $arrDca['fields'][$strName] = [
-            'label' => &$GLOBALS['TL_LANG'][$strParentTable][$strName],
+        $dca['fields'][$name] = [
+            'label' => &$GLOBALS['TL_LANG'][$parentTable][$name],
             'exclude' => true,
             'inputType' => 'listWidget',
             'eval' => [
                 'listWidget' => [
                     'items_callback' => ['huh.entity_filter.backend.entity_filter', 'getItemsForDca'],
                     'header_fields_callback' => ['huh.entity_filter.backend.entity_filter', 'getHeaderFieldsForDca'],
-                    'filterField' => $strFilterFieldname,
-                    'fields' => $arrFields,
-                    'table' => $strChildTable,
+                    'filterField' => $filterFieldname,
+                    'fields' => $fields,
+                    'table' => $childTable,
                 ],
             ],
         ];
     }
 
-    public static function addFilterCopierToDca(
-        $strName,
-        $strParentTable,
-        $strFieldTable,
-        $strFieldname,
-        $arrOptionsCallback = ['HeimrichHannot\FieldValueCopier\Backend\FieldValueCopier', 'getOptions']
+    public function addFilterCopierToDca(
+        string $name,
+        string $parentTable,
+        string $fieldTable,
+        string $fieldname,
+        array $optionsCallback = ['HeimrichHannot\FieldValueCopier\Backend\FieldValueCopier', 'getOptions']
     ) {
-        \Controller::loadDataContainer($strParentTable);
-        $arrDca = &$GLOBALS['TL_DCA'][$strParentTable];
+        Controller::loadDataContainer($parentTable);
+        $dca = &$GLOBALS['TL_DCA'][$parentTable];
 
-        $arrDca['fields'][$strName] = [
+        $dca['fields'][$name] = [
             'exclude' => true,
             'inputType' => 'fieldValueCopier',
             'eval' => [
                 'fieldValueCopier' => [
-                    'table' => $strFieldTable,
-                    'field' => $strFieldname,
-                    'options_callback' => $arrOptionsCallback,
+                    'table' => $fieldTable,
+                    'field' => $fieldname,
+                    'options_callback' => $optionsCallback,
                 ],
             ],
         ];
