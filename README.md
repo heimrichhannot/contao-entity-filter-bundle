@@ -20,7 +20,7 @@ _Note: Of course, you can also copy these 3 functions and customize them if they
 #### Add the entity filter widget to your dca:
 
 ```
-\HeimrichHannot\EntityFilter\Backend\EntityFilter::addFilterToDca(
+\Contao\System::getContainer()->get('huh.entity_filter.manager')->addFilterToDca(
     // the name of the field
     'memberConditions',
     // your dca
@@ -33,7 +33,7 @@ _Note: Of course, you can also copy these 3 functions and customize them if they
 #### Add a field for copying entity filters from other records:
 
 ```
-\HeimrichHannot\EntityFilter\Backend\EntityFilter::addFilterCopierToDca(
+\Contao\System::getContainer()->get('huh.entity_filter.manager')->addFilterCopierToDca(
     // the name of the field
     'filterCopier',
     // your dca
@@ -50,7 +50,7 @@ _Note: Of course, you can also copy these 3 functions and customize them if they
 #### Add a live-reloaded table for showing the results of your conditions:
 
 ```
-\HeimrichHannot\EntityFilter\Backend\EntityFilter::addListToDca(
+\Contao\System::getContainer()->get('huh.entity_filter.manager')->addListToDca(
     // the name of the field
     'memberList',
     // your dca

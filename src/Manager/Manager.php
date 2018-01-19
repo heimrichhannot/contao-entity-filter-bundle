@@ -27,23 +27,28 @@ class Manager
         $this->framework = $framework;
     }
 
-    public static function addFilterToDca(string $name, string $parentTable, string $childTable)
+    public static function addFilterToDca(string $name, string $parentTable, string $childTable, array $multiColumnEditorOverrides = [])
     {
         Controller::loadDataContainer($parentTable);
         Controller::loadDataContainer('tl_entity_filter');
         System::loadLanguageFile('tl_entity_filter');
         $dca = &$GLOBALS['TL_DCA'][$parentTable];
 
+        $mceOptions = array_merge(
+            [
+                'class' => 'entity-filter',
+                'fields' => $GLOBALS['TL_DCA']['tl_entity_filter']['fields'],
+                'table' => $childTable,
+            ],
+            $multiColumnEditorOverrides
+        );
+
         $dca['fields'][$name] = [
             'label' => &$GLOBALS['TL_LANG'][$parentTable][$name],
             'exclude' => true,
             'inputType' => 'multiColumnEditor',
             'eval' => [
-                'multiColumnEditor' => [
-                    'class' => 'entity-filter',
-                    'fields' => $GLOBALS['TL_DCA']['tl_entity_filter']['fields'],
-                    'table' => $childTable,
-                ],
+                'multiColumnEditor' => $mceOptions,
             ],
             'sql' => 'blob NULL',
         ];
