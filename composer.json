@@ -2,7 +2,7 @@
   "name": "heimrichhannot/contao-entity-filter-bundle",
   "type": "contao-bundle",
   "description": "This module offers an input type for selecting one or more entities by comfortably 'clicking together' sql-like conditions.",
-  "license": "LGPL-3.0+",
+  "license": "LGPL-3.0-or-later",
   "require": {
     "php": ">=7.1.0",
     "contao/core-bundle": "^4.4",

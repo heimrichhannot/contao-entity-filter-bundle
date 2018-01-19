@@ -1,7 +1,11 @@
 .multi-column-editor-wrapper {
   .entity-filter {
-    .row {
+    .mce-row {
       .form-group {
+        > h3 {
+          display: block;
+        }
+
         &.connective_1 {
           opacity: 0;
         }
@@ -13,35 +17,26 @@
         }
 
         &[class*="bracketLeft"], &[class*="bracketRight"] {
-          margin-top: 18px;
+          margin-top: 2px !important;
 
           label {
-            padding: 2px 7px 5px 7px;
+            padding: 7px 12px;
             border: 1px solid #aaa;
-            border-radius: 3px;
-            color: #555;
+            border-radius: 2px;
+            box-sizing: border-box;
             cursor: pointer;
-            line-height: 1;
-            text-shadow: 1px 1px 0 #eee;
-            background: #eee;
-            background-image: -moz-linear-gradient(bottom, #ccc 0%, #eee 60%);
-            background-image: -webkit-linear-gradient(bottom, #ccc 0%, #eee 60%);
-            background-image: -o-linear-gradient(bottom, #ccc 0%, #eee 60%);
-            background-image: -ms-linear-gradient(bottom, #ccc 0%, #eee 60%);
-            background-image: linear-gradient(to top, #ccc 0%, #eee 60%);
+            transition: background .2s ease;
+
+            &:hover {
+              background: #eee;
+            }
           }
 
           input {
             display: none;
 
             &:checked + label {
-              background-image: -moz-linear-gradient(bottom, #ccc 0%, #ccc 60%);
-              background-image: -webkit-linear-gradient(bottom, #ccc 0%, #ccc 60%);
-              background-image: -o-linear-gradient(bottom, #ccc 0%, #ccc 60%);
-              background-image: -ms-linear-gradient(bottom, #ccc 0%, #ccc 60%);
-              background-image: linear-gradient(to top, #ccc 0%, #ccc 60%);
-
-              color: white;
+              background: #ccc;
             }
           }
         }
