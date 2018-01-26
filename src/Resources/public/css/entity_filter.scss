@@ -2,10 +2,6 @@
   .entity-filter {
     .mce-row {
       .form-group {
-        > h3 {
-          display: block;
-        }
-
         &.connective_1 {
           opacity: 0;
         }
@@ -17,7 +13,7 @@
         }
 
         &[class*="bracketLeft"], &[class*="bracketRight"] {
-          margin-top: 2px !important;
+          margin-top: 4px !important;
 
           label {
             padding: 7px 12px;
@@ -40,6 +36,10 @@
               background: #ccc;
             }
           }
+        }
+
+        &[class*="bracketLeft_1"], &[class*="bracketRight_1"] {
+          margin-top: 2px !important;
         }
       }
     }
