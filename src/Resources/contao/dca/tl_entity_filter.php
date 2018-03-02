@@ -27,7 +27,7 @@ $GLOBALS['TL_DCA']['tl_entity_filter'] = [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_filter']['operator'],
             'inputType' => 'select',
             'options'   => \HeimrichHannot\UtilsBundle\Database\DatabaseUtil::OPERATORS,
-            'reference' => &$GLOBALS['TL_LANG']['MSC']['operators'],
+            'reference' => &$GLOBALS['TL_LANG']['MSC']['databaseOperators'],
             'eval'      => ['tl_class' => 'w50', 'groupStyle' => 'width: 115px'],
         ],
         'value'        => [
