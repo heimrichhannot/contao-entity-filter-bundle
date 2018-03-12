@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2018-03-12
+
+### Changed
+- added dependency to contao-utils-bundle 2.0.0
+
 ## [1.0.2] - 2018-03-02
 
 ### Changed

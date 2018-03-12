@@ -6,7 +6,7 @@
   "require": {
     "php": ">=7.1.0",
     "contao/core-bundle": "^4.4",
-    "heimrichhannot/contao-utils-bundle": "^1.0",
+    "heimrichhannot/contao-utils-bundle": "^2.0",
     "heimrichhannot/contao-multi_column_editor": "^1.0",
     "heimrichhannot/contao-list_widget": "^2.0",
     "heimrichhannot/contao-field_value_copier": "^1.0"
