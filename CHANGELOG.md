@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2018-03-12
+
+### Added
+- `huh.entity_filter.backend.entity_filter` now provides `computeQueryBuilderCondition` to properly support doctrine querybuilder
+
 ## [1.1.0] - 2018-03-12
 
 ### Changed

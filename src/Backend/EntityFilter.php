@@ -15,6 +15,7 @@ use Contao\DataContainer;
 use Contao\Message;
 use Contao\StringUtil;
 use Contao\System;
+use Doctrine\DBAL\Query\QueryBuilder;
 
 class EntityFilter extends \Backend
 {
@@ -62,7 +63,7 @@ class EntityFilter extends \Backend
                 $fields = '*';
             }
 
-            $query = 'SELECT '.$fields.' FROM '.$listDca['eval']['listWidget']['table'];
+            $query = 'SELECT ' . $fields . ' FROM ' . $listDca['eval']['listWidget']['table'];
 
             list($where, $values) = $this->computeSqlCondition(
                 StringUtil::deserialize($activeRecord->{$filter}, true),
@@ -73,7 +74,7 @@ class EntityFilter extends \Backend
             $items = [];
 
             try {
-                $query = $query.($where ? ' WHERE '.$where : '');
+                $query = $query . ($where ? ' WHERE ' . $where : '');
 
                 $itemObjects = \Database::getInstance()->prepare($query)->execute($values);
 
@@ -113,7 +114,7 @@ class EntityFilter extends \Backend
             // build query
             $filter = $listDca['eval']['listWidget']['filterField'];
 
-            $query = 'SELECT COUNT(*) AS count FROM '.$listDca['eval']['listWidget']['table'];
+            $query = 'SELECT COUNT(*) AS count FROM ' . $listDca['eval']['listWidget']['table'];
 
             list($where, $values) = $this->computeSqlCondition(
                 deserialize($activeRecord->{$filter}, true),
@@ -121,7 +122,7 @@ class EntityFilter extends \Backend
             );
 
             // get items
-            $items = Database::getInstance()->prepare($query.($where ? ' WHERE '.$where : ''))->execute($values);
+            $items = Database::getInstance()->prepare($query . ($where ? ' WHERE ' . $where : ''))->execute($values);
 
             return $items->count;
         }
@@ -137,7 +138,7 @@ class EntityFilter extends \Backend
 
         \Controller::loadDataContainer($table);
 
-        $dca = $GLOBALS['TL_DCA'][$table]['fields'][$dc->field]['eval']['listWidget'];
+        $dca      = $GLOBALS['TL_DCA'][$table]['fields'][$dc->field]['eval']['listWidget'];
         $childDca = $GLOBALS['TL_DCA'][$dca['table']];
 
         if (!isset($dca['fields']) || empty($dca['fields'])) {
@@ -177,7 +178,7 @@ class EntityFilter extends \Backend
             return array_combine(
                 array_map(
                     function ($val) use ($childTable) {
-                        return $childTable.'.'.$val;
+                        return $childTable . '.' . $val;
                     },
                     array_keys($fields)
                 ),
@@ -190,13 +191,15 @@ class EntityFilter extends \Backend
 
     /**
      * @param array $conditions The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
+     * @param string $table
+     * @param QueryBuilder $queryBuilder
      *
      * @return array Returns array($strCondition, $arrValues)
      */
     public function computeSqlCondition(array $conditions, string $table)
     {
         $condition = '';
-        $values = [];
+        $values    = [];
 
         // a condition can't start with a logical connective!
         if (isset($conditions[0]['connective'])) {
@@ -213,12 +216,46 @@ class EntityFilter extends \Backend
                 $table
             );
 
-            $condition .= ' '.$conditionArray['connective'].' '.($conditionArray['bracketLeft'] ? '(' : '').$clause
-                          .($conditionArray['bracketRight'] ? ')' : '');
+            $condition .= ' ' . $conditionArray['connective'] . ' ' . ($conditionArray['bracketLeft'] ? '(' : '') . $clause
+                . ($conditionArray['bracketRight'] ? ')' : '');
 
             $values = array_merge($values, $clauseValues);
         }
 
         return [trim($condition), $values];
+    }
+
+    /**
+     * Compute conditions using doctrine QueryBuilder
+     * @param QueryBuilder $queryBuilder
+     * @param array $conditions The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
+     * @param string $table
+     *
+     * @return QueryBuilder
+     */
+    public function computeQueryBuilderCondition(QueryBuilder $queryBuilder, array $conditions, string $table)
+    {
+        $condition = '';
+
+        // a condition can't start with a logical connective!
+        if (isset($conditions[0]['connective'])) {
+            $conditions[0]['connective'] = '';
+        }
+
+        foreach ($conditions as $conditionArray) {
+            $field = str_replace($table . '.', '', $conditionArray['field']);
+            $dca   = $GLOBALS['TL_DCA'][$table]['fields'][$field] ?? null;
+
+            $where = System::getContainer()->get('huh.utils.database')->composeWhereForQueryBuilder($queryBuilder, $field, $conditionArray['operator'], $dca, $conditionArray['value']);
+
+            $condition .= ' ' . $conditionArray['connective'] . ' ' . ($conditionArray['bracketLeft'] ? '(' : '') . $where
+                . ($conditionArray['bracketRight'] ? ')' : '');
+        }
+
+        if (!empty($condition)) {
+            $queryBuilder->andWhere($condition);
+        }
+
+        return $queryBuilder;
     }
 }
