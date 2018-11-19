@@ -5,5 +5,6 @@ services:
             - "@contao.framework"
     huh.entity_filter.manager:
         class: HeimrichHannot\EntityFilterBundle\Manager\Manager
+        public: true
         arguments:
             - "@contao.framework"

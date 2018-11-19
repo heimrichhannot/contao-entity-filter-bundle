@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2018-11-19
+
+### Fixed
+- symfony 4.x compatibility
+
 ## [1.3.0] - 2018-10-24
 
 ### Fixed
