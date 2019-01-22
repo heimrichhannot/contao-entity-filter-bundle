@@ -9,7 +9,7 @@
     "heimrichhannot/contao-utils-bundle": "^2.0",
     "heimrichhannot/contao-multi-column-editor-bundle": "^1.0",
     "heimrichhannot/contao-list_widget": "^2.0",
-    "heimrichhannot/contao-field_value_copier": "^1.0"
+    "heimrichhannot/contao-field-value-copier-bundle": "^1.0"
   },
   "require-dev": {
     "contao/manager-plugin": "^2.0",

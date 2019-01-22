@@ -42,8 +42,12 @@ _Note: Of course, you can also copy these 3 functions and customize them if they
     'tl_recipient_list',
     // the entity_filter field
     'memberConditions',
-    // a custom options_callback -> if left out, array('HeimrichHannot\FieldValueCopier\Backend\FieldValueCopier', 'getOptions') is used
-    array('Namespace\SomeClass', 'getOptions')
+    // a custom options_callback -> if left out, ['huh.field_value_copier.util.field_value_copier_util', 'getOptions'] is used
+    ['huh.field_value_copier.util.field_value_copier_util', 'getOptions'],
+    // config parameters for field value copier widget
+    [
+        'labelPattern' => '%title% (ID %id%)'
+    ]
 );
 ```
 

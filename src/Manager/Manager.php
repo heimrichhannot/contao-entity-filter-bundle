@@ -80,7 +80,8 @@ class Manager
         string $parentTable,
         string $fieldTable,
         string $fieldname,
-        array $optionsCallback = ['HeimrichHannot\FieldValueCopier\Backend\FieldValueCopier', 'getOptions']
+        array $optionsCallback = ['huh.field_value_copier.util.field_value_copier_util', 'getOptions'],
+        array $config = []
     ) {
         Controller::loadDataContainer($parentTable);
         $dca = &$GLOBALS['TL_DCA'][$parentTable];
@@ -93,6 +94,7 @@ class Manager
                     'table' => $fieldTable,
                     'field' => $fieldname,
                     'options_callback' => $optionsCallback,
+                    'config' => $config
                 ],
             ],
         ];

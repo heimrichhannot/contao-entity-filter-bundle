@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2019-01-22
+
+### Change
+- replaced `heimrichhannot/contao-field_value_copier` with `heimrichhannot/contao-field-value-copier-bundle`
+
 ## [1.3.1] - 2018-11-19
 
 ### Fixed
