@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.6.1] - 2020-04-08
+- contains all changes from 1.6.0, due an commit error no changes were added in 1.6.0
+
 ## [1.6.0] - 2020-04-07
 - added check if foreign field exist to EntityFilter
 - fixed non-public service
