@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2018 Heimrich & Hannot GmbH
+ * Copyright (c) 2020 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
@@ -57,15 +57,23 @@ class EntityFilter extends \Backend
             // build query
             $filter = $listDca['eval']['listWidget']['filterField'];
 
-            if (is_array($listDca['eval']['listWidget']['fields']) && !empty($listDca['eval']['listWidget']['fields'])) {
-                $fields = implode(',', $listDca['eval']['listWidget']['fields']);
+            $database = Database::getInstance();
+
+            if (\is_array($listDca['eval']['listWidget']['fields']) && !empty($listDca['eval']['listWidget']['fields'])) {
+                $existingFields = [];
+                foreach ($listDca['eval']['listWidget']['fields'] as $field) {
+                    if ($database->fieldExists($field, $listDca['eval']['listWidget']['table'])) {
+                        $existingFields[] = $field;
+                    }
+                }
+                $fields = implode(',', $existingFields);
             } else {
                 $fields = '*';
             }
 
-            $query = 'SELECT ' . $fields . ' FROM ' . $listDca['eval']['listWidget']['table'];
+            $query = 'SELECT '.$fields.' FROM '.$listDca['eval']['listWidget']['table'];
 
-            list($where, $values) = $this->computeSqlCondition(
+            [$where, $values] = $this->computeSqlCondition(
                 StringUtil::deserialize($activeRecord->{$filter}, true),
                 $listDca['eval']['listWidget']['table']
             );
@@ -74,7 +82,7 @@ class EntityFilter extends \Backend
             $items = [];
 
             try {
-                $query = $query . ($where ? ' WHERE ' . $where : '');
+                $query = $query.($where ? ' WHERE '.$where : '');
 
                 $itemObjects = \Database::getInstance()->prepare($query)->execute($values);
 
@@ -114,15 +122,15 @@ class EntityFilter extends \Backend
             // build query
             $filter = $listDca['eval']['listWidget']['filterField'];
 
-            $query = 'SELECT COUNT(*) AS count FROM ' . $listDca['eval']['listWidget']['table'];
+            $query = 'SELECT COUNT(*) AS count FROM '.$listDca['eval']['listWidget']['table'];
 
-            list($where, $values) = $this->computeSqlCondition(
+            [$where, $values] = $this->computeSqlCondition(
                 deserialize($activeRecord->{$filter}, true),
                 $listDca['eval']['listWidget']['table']
             );
 
             // get items
-            $items = Database::getInstance()->prepare($query . ($where ? ' WHERE ' . $where : ''))->execute($values);
+            $items = Database::getInstance()->prepare($query.($where ? ' WHERE '.$where : ''))->execute($values);
 
             return $items->count;
         }
@@ -138,7 +146,7 @@ class EntityFilter extends \Backend
 
         \Controller::loadDataContainer($table);
 
-        $dca      = $GLOBALS['TL_DCA'][$table]['fields'][$dc->field]['eval']['listWidget'];
+        $dca = $GLOBALS['TL_DCA'][$table]['fields'][$dc->field]['eval']['listWidget'];
         $childDca = $GLOBALS['TL_DCA'][$dca['table']];
 
         if (!isset($dca['fields']) || empty($dca['fields'])) {
@@ -178,7 +186,7 @@ class EntityFilter extends \Backend
             return array_combine(
                 array_map(
                     function ($val) use ($childTable) {
-                        return $childTable . '.' . $val;
+                        return $childTable.'.'.$val;
                     },
                     array_keys($fields)
                 ),
@@ -190,8 +198,8 @@ class EntityFilter extends \Backend
     }
 
     /**
-     * @param array $conditions The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
-     * @param string $table
+     * @param array        $conditions   The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
+     * @param string       $table
      * @param QueryBuilder $queryBuilder
      *
      * @return array Returns array($strCondition, $arrValues)
@@ -199,7 +207,7 @@ class EntityFilter extends \Backend
     public function computeSqlCondition(array $conditions, string $table)
     {
         $condition = '';
-        $values    = [];
+        $values = [];
 
         // a condition can't start with a logical connective!
         if (isset($conditions[0]['connective'])) {
@@ -207,17 +215,17 @@ class EntityFilter extends \Backend
         }
 
         foreach ($conditions as $conditionArray) {
-            list(
+            [
                 $clause, $clauseValues
-                ) = System::getContainer()->get('huh.utils.database')->computeCondition(
+                ] = System::getContainer()->get('huh.utils.database')->computeCondition(
                 $conditionArray['field'],
                 $conditionArray['operator'],
                 $conditionArray['value'],
                 $table
             );
 
-            $condition .= ' ' . $conditionArray['connective'] . ' ' . ($conditionArray['bracketLeft'] ? '(' : '') . $clause
-                . ($conditionArray['bracketRight'] ? ')' : '');
+            $condition .= ' '.$conditionArray['connective'].' '.($conditionArray['bracketLeft'] ? '(' : '').$clause
+                .($conditionArray['bracketRight'] ? ')' : '');
 
             $values = array_merge($values, $clauseValues);
         }
@@ -226,10 +234,11 @@ class EntityFilter extends \Backend
     }
 
     /**
-     * Compute conditions using doctrine QueryBuilder
+     * Compute conditions using doctrine QueryBuilder.
+     *
      * @param QueryBuilder $queryBuilder
-     * @param array $conditions The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
-     * @param string $table
+     * @param array        $conditions   The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
+     * @param string       $table
      *
      * @return QueryBuilder
      */
@@ -243,13 +252,13 @@ class EntityFilter extends \Backend
         }
 
         foreach ($conditions as $conditionArray) {
-            $field = str_replace($table . '.', '', $conditionArray['field']);
-            $dca   = $GLOBALS['TL_DCA'][$table]['fields'][$field] ?? null;
+            $field = str_replace($table.'.', '', $conditionArray['field']);
+            $dca = $GLOBALS['TL_DCA'][$table]['fields'][$field] ?? null;
 
             $where = System::getContainer()->get('huh.utils.database')->composeWhereForQueryBuilder($queryBuilder, $field, $conditionArray['operator'], $dca, $conditionArray['value']);
 
-            $condition .= ' ' . $conditionArray['connective'] . ' ' . ($conditionArray['bracketLeft'] ? '(' : '') . $where
-                . ($conditionArray['bracketRight'] ? ')' : '');
+            $condition .= ' '.$conditionArray['connective'].' '.($conditionArray['bracketLeft'] ? '(' : '').$where
+                .($conditionArray['bracketRight'] ? ')' : '');
         }
 
         if (!empty($condition)) {

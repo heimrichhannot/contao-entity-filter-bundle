@@ -1,6 +1,7 @@
 services:
     huh.entity_filter.backend.entity_filter:
         class: HeimrichHannot\EntityFilterBundle\Backend\EntityFilter
+        public: true
         arguments:
             - "@contao.framework"
     huh.entity_filter.manager:

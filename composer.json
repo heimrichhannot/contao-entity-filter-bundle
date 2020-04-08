@@ -4,10 +4,10 @@
   "description": "This module offers an input type for selecting one or more entities by comfortably 'clicking together' sql-like conditions.",
   "license": "LGPL-3.0-or-later",
   "require": {
-    "php": ">=7.1.0",
+    "php": "^7.1",
     "contao/core-bundle": "^4.4",
     "heimrichhannot/contao-utils-bundle": "^2.0",
-    "heimrichhannot/contao-multi-column-editor-bundle": "^1.0",
+    "heimrichhannot/contao-multi-column-editor-bundle": "^2.0",
     "heimrichhannot/contao-list_widget": "^2.0",
     "heimrichhannot/contao-field-value-copier-bundle": "^1.0"
   },
