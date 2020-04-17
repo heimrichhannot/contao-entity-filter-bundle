@@ -59,6 +59,7 @@ class EntityFilter extends \Backend
 
             if (\is_array($listDca['eval']['listWidget']['fields']) && !empty($listDca['eval']['listWidget']['fields'])) {
                 $existingFields = [];
+
                 foreach ($listDca['eval']['listWidget']['fields'] as $field) {
                     if ($database->fieldExists($field, $listDca['eval']['listWidget']['table'])) {
                         $existingFields[] = $field;

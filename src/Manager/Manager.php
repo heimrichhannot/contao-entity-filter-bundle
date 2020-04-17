@@ -46,6 +46,7 @@ class Manager
             'exclude' => true,
             'inputType' => 'multiColumnEditor',
             'eval' => [
+                'tl_class' => 'long clr',
                 'multiColumnEditor' => $mceOptions,
             ],
             'sql' => 'blob NULL',

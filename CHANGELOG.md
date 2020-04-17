@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.6.3] - 2020-04-17
+- added tl_class to default dca data
+- fixed php_cs
+
 ## [1.6.2] - 2020-04-17
 - fixed flexbox style error for contao 4.9
 
