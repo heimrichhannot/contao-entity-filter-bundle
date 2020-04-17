@@ -19,6 +19,9 @@ _Note: Of course, you can also copy these 3 functions and customize them if they
 
 #### Add the entity filter widget to your dca:
 
+*Hint: If you like to set the table to be filtered dynamically, you can do that in an `onload_callback`.
+But you still have to call the following function in your dca and not the callback because else `exclude` wouldn't be set correctly.* 
+
 ```
 \Contao\System::getContainer()->get('huh.entity_filter.manager')->addFilterToDca(
     // the name of the field

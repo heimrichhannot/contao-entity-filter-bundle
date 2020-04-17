@@ -13,7 +13,7 @@
         }
 
         &[class*="bracketLeft"], &[class*="bracketRight"] {
-          margin-top: 4px !important;
+          margin-top: 2px !important;
 
           label {
             padding: 7px 12px;
@@ -23,6 +23,7 @@
             cursor: pointer;
             transition: background .2s ease;
             margin-left: 0;
+            display: inline-block;
 
             &:hover {
               background: #eee;

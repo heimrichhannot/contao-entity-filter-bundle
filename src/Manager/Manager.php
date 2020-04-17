@@ -19,8 +19,6 @@ class Manager
 
     /**
      * Constructor.
-     *
-     * @param ContaoFrameworkInterface $framework
      */
     public function __construct(ContaoFrameworkInterface $framework)
     {

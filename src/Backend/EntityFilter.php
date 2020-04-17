@@ -24,8 +24,6 @@ class EntityFilter extends \Backend
 
     /**
      * Constructor.
-     *
-     * @param ContaoFrameworkInterface $framework
      */
     public function __construct(ContaoFrameworkInterface $framework)
     {
@@ -199,7 +197,6 @@ class EntityFilter extends \Backend
 
     /**
      * @param array        $conditions   The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
-     * @param string       $table
      * @param QueryBuilder $queryBuilder
      *
      * @return array Returns array($strCondition, $arrValues)
@@ -236,9 +233,7 @@ class EntityFilter extends \Backend
     /**
      * Compute conditions using doctrine QueryBuilder.
      *
-     * @param QueryBuilder $queryBuilder
-     * @param array        $conditions   The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
-     * @param string       $table
+     * @param array $conditions The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
      *
      * @return QueryBuilder
      */

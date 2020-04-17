@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.6.2] - 2020-04-17
+- fixed flexbox style error for contao 4.9
+
 ## [1.6.1] - 2020-04-08
 - contains all changes from 1.6.0, due an commit error no changes were added in 1.6.0
 
