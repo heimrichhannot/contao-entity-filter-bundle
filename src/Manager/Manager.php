@@ -34,6 +34,7 @@ class Manager
 
         $mceOptions = array_merge(
             [
+                'minRowCount' => 0,
                 'class' => 'entity-filter',
                 'fields' => $GLOBALS['TL_DCA']['tl_entity_filter']['fields'],
                 'table' => $childTable,

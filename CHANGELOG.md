@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2020-09-22
+- added `ModifyEntityFilterQueryEvent`
+- added minRowCount = 0 per default
+
 ## [1.6.3] - 2020-04-17
 - added tl_class to default dca data
 - fixed php_cs

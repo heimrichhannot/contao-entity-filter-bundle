@@ -75,3 +75,9 @@ But you still have to call the following function in your dca and not the callba
     )
 );
 ```
+
+## Events
+
+Name | Arguments
+---- | ---------
+`ModifyEntityFilterQueryEvent` | `string $table`, `string $field`, `$activeRecord`, `string $query`, `string $where`, `array $values`, `array $listDca`

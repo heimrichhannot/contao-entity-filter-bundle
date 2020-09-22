@@ -4,6 +4,7 @@ services:
         public: true
         arguments:
             - "@contao.framework"
+            - "@event_dispatcher"
     huh.entity_filter.manager:
         class: HeimrichHannot\EntityFilterBundle\Manager\Manager
         public: true

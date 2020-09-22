@@ -16,18 +16,25 @@ use Contao\Message;
 use Contao\StringUtil;
 use Contao\System;
 use Doctrine\DBAL\Query\QueryBuilder;
+use HeimrichHannot\EntityFilterBundle\Event\ModifyEntityFilterQueryEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EntityFilter extends \Backend
 {
     /** @var ContaoFrameworkInterface */
     protected $framework;
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
 
     /**
      * Constructor.
      */
-    public function __construct(ContaoFrameworkInterface $framework)
+    public function __construct(ContaoFrameworkInterface $framework, EventDispatcherInterface $eventDispatcher)
     {
         $this->framework = $framework;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function getHeaderFieldsForDca(array $config, $context, DataContainer $dc)
@@ -82,6 +89,13 @@ class EntityFilter extends \Backend
 
             try {
                 $query = $query.($where ? ' WHERE '.$where : '');
+
+                $event = $this->eventDispatcher->dispatch(ModifyEntityFilterQueryEvent::NAME, new ModifyEntityFilterQueryEvent(
+                    $table, $listDca['eval']['listWidget']['table'], $field, $activeRecord, $query, $where, $values, $listDca
+                ));
+
+                $query = $event->getQuery();
+                $values = $event->getValues();
 
                 $itemObjects = \Database::getInstance()->prepare($query)->execute($values);
 
@@ -143,9 +157,14 @@ class EntityFilter extends \Backend
             return [];
         }
 
-        \Controller::loadDataContainer($table);
+        Controller::loadDataContainer($table);
+        System::loadLanguageFile($table);
 
         $dca = $GLOBALS['TL_DCA'][$table]['fields'][$dc->field]['eval']['listWidget'];
+
+        Controller::loadDataContainer($dca['table']);
+        System::loadLanguageFile($dca['table']);
+
         $childDca = $GLOBALS['TL_DCA'][$dca['table']];
 
         if (!isset($dca['fields']) || empty($dca['fields'])) {
