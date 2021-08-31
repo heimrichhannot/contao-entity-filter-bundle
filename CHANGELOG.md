@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2021-08-31
+
+- Added: support for php 8
+
 ## [1.7.0] - 2020-09-22
 - added `ModifyEntityFilterQueryEvent`
 - added minRowCount = 0 per default
