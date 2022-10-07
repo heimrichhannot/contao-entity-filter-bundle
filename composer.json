@@ -8,8 +8,9 @@
     "contao/core-bundle": "^4.4",
     "heimrichhannot/contao-utils-bundle": "^2.0",
     "heimrichhannot/contao-multi-column-editor-bundle": "^2.0",
-    "heimrichhannot/contao-list_widget": "^2.0",
-    "heimrichhannot/contao-field-value-copier-bundle": "^1.0"
+    "heimrichhannot/contao-list-widget-bundle": "^1.1",
+    "heimrichhannot/contao-field-value-copier-bundle": "^1.0",
+    "symfony/dependency-injection": "^3.4 || ^4.4 || ^5.4"
   },
   "require-dev": {
     "contao/manager-plugin": "^2.0",

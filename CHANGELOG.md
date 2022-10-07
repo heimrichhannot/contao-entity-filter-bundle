@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] - 2022-10-09
+- Changed: replace `heimrichhannot/contao-list_widget` with `heimrichhannot/contao-list-widget-bundle`
+- Fixed: missing dependency
+
 ## [1.8.0] - 2021-08-31
 
 - Added: support for php 8
