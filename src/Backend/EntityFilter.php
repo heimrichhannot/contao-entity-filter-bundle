@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2020 Heimrich & Hannot GmbH
+ * Copyright (c) 2023 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
@@ -9,7 +9,7 @@
 namespace HeimrichHannot\EntityFilterBundle\Backend;
 
 use Contao\Controller;
-use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\Database;
 use Contao\DataContainer;
 use Contao\Message;
@@ -19,19 +19,12 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use HeimrichHannot\EntityFilterBundle\Event\ModifyEntityFilterQueryEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class EntityFilter extends \Backend
+class EntityFilter
 {
-    /** @var ContaoFrameworkInterface */
-    protected $framework;
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
+    protected ContaoFramework $framework;
+    private EventDispatcherInterface $eventDispatcher;
 
-    /**
-     * Constructor.
-     */
-    public function __construct(ContaoFrameworkInterface $framework, EventDispatcherInterface $eventDispatcher)
+    public function __construct(ContaoFramework $framework, EventDispatcherInterface $eventDispatcher)
     {
         $this->framework = $framework;
         $this->eventDispatcher = $eventDispatcher;
@@ -90,14 +83,24 @@ class EntityFilter extends \Backend
             try {
                 $query = $query.($where ? ' WHERE '.$where : '');
 
-                $event = $this->eventDispatcher->dispatch(ModifyEntityFilterQueryEvent::NAME, new ModifyEntityFilterQueryEvent(
-                    $table, $listDca['eval']['listWidget']['table'], $field, $activeRecord, $query, $where, $values, $listDca
-                ));
+                $event = $this->eventDispatcher->dispatch(
+                    new ModifyEntityFilterQueryEvent(
+                        $table,
+                        $listDca['eval']['listWidget']['table'],
+                        $field,
+                        $activeRecord,
+                        $query,
+                        $where,
+                        $values,
+                        $listDca
+                    ),
+                    ModifyEntityFilterQueryEvent::NAME
+                );
 
                 $query = $event->getQuery();
                 $values = $event->getValues();
 
-                $itemObjects = \Database::getInstance()->prepare($query)->execute($values);
+                $itemObjects = Database::getInstance()->prepare($query)->execute($values);
 
                 if ($itemObjects->numRows > 0) {
                     while ($itemObjects->next()) {
@@ -138,7 +141,7 @@ class EntityFilter extends \Backend
             $query = 'SELECT COUNT(*) AS count FROM '.$listDca['eval']['listWidget']['table'];
 
             [$where, $values] = $this->computeSqlCondition(
-                deserialize($activeRecord->{$filter}, true),
+                StringUtil::deserialize($activeRecord->{$filter}, true),
                 $listDca['eval']['listWidget']['table']
             );
 

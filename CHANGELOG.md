@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.10.0] - 2023-03-08
+- Changed: dropped contao < 4.9 support
+- Changed: dropped php < 7.4 support
+- Fixed: incompatibility with symfony 5
+
 ## [1.9.0] - 2022-10-09
 - Changed: replace `heimrichhannot/contao-list_widget` with `heimrichhannot/contao-list-widget-bundle`
 - Fixed: missing dependency
