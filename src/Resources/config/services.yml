@@ -1,10 +1,17 @@
 services:
+    HeimrichHannot\EntityFilterBundle\:
+        resource: '../../{Util}/*'
+        autowire: true
+        autoconfigure: true
+        public: true
+
     huh.entity_filter.backend.entity_filter:
         class: HeimrichHannot\EntityFilterBundle\Backend\EntityFilter
         public: true
         arguments:
             - "@contao.framework"
             - "@event_dispatcher"
+
     huh.entity_filter.manager:
         class: HeimrichHannot\EntityFilterBundle\Manager\Manager
         public: true

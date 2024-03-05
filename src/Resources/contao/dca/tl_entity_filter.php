@@ -1,13 +1,15 @@
 <?php
 
+use HeimrichHannot\EntityFilterBundle\Util\DatabaseUtilPolyfill;
+
 $GLOBALS['TL_DCA']['tl_entity_filter'] = [
     'fields' => [
         'connective'     => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_filter']['connective'],
             'inputType' => 'select',
             'options'   => [
-                \HeimrichHannot\UtilsBundle\Database\DatabaseUtil::SQL_CONDITION_OR,
-                \HeimrichHannot\UtilsBundle\Database\DatabaseUtil::SQL_CONDITION_AND
+                DatabaseUtilPolyfill::SQL_CONDITION_OR,
+                DatabaseUtilPolyfill::SQL_CONDITION_AND
             ],
             'reference' => &$GLOBALS['TL_LANG']['MSC']['connectives'],
             'eval'      => ['tl_class' => 'w50', 'groupStyle' => 'width: 65px', 'includeBlankOption' => true],
@@ -26,7 +28,7 @@ $GLOBALS['TL_DCA']['tl_entity_filter'] = [
         'operator'     => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_filter']['operator'],
             'inputType' => 'select',
-            'options'   => \HeimrichHannot\UtilsBundle\Database\DatabaseUtil::OPERATORS,
+            'options'   => DatabaseUtilPolyfill::OPERATORS,
             'reference' => &$GLOBALS['TL_LANG']['MSC']['databaseOperators'],
             'eval'      => ['tl_class' => 'w50', 'groupStyle' => 'width: 115px'],
         ],

@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## prepared [1.11.0] - 2023-03-05
+- Changed: dropped contao < 4.13 support
+- Added: support for contao 5
+
 ## [1.10.0] - 2023-03-08
 - Changed: dropped contao < 4.9 support
 - Changed: dropped php < 7.4 support

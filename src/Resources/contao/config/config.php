@@ -1,9 +1,18 @@
 <?php
 
+use Contao\System;
+
 /**
- * CSS
+ * ## CSS
  */
-if (TL_MODE == 'BE')
+(function($scopeMatcher, $requestStack)
 {
-    $GLOBALS['TL_CSS']['entity_filter'] = '/bundles/heimrichhannotcontaoentityfilter/css/entity_filter.css';
-}
+    $request = $requestStack->getCurrentRequest();
+    if ($request && $scopeMatcher->isBackendRequest($request))
+    {
+        $GLOBALS['TL_CSS']['entity_filter'] = '/bundles/heimrichhannotcontaoentityfilter/css/entity_filter.css';
+    }
+})(
+    System::getContainer()->get('contao.routing.scope_matcher'),
+    System::getContainer()->get('request_stack')
+);

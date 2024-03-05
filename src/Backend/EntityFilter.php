@@ -16,7 +16,10 @@ use Contao\Message;
 use Contao\StringUtil;
 use Contao\System;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Exception;
 use HeimrichHannot\EntityFilterBundle\Event\ModifyEntityFilterQueryEvent;
+use HeimrichHannot\EntityFilterBundle\Util\DatabaseUtilPolyfill;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EntityFilter
@@ -30,17 +33,23 @@ class EntityFilter
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function getHeaderFieldsForDca(array $config, $context, DataContainer $dc)
+    /**
+     * @throws Exception
+     */
+    public function getHeaderFieldsForDca(array $config, $context, DataContainer $dc): array
     {
         return $this->getHeaderFields($dc, $context);
     }
 
-    public function getItemsForDca(array $config, $context, DataContainer $dc)
+    /**
+     * @throws Exception
+     */
+    public function getItemsForDca(array $config, $context, DataContainer $dc): array
     {
         return $this->getItems($dc->table, $dc->field, $dc->activeRecord);
     }
 
-    public function getItems(string $table, string $field, $activeRecord)
+    public function getItems(string $table, string $field, $activeRecord): array
     {
         if (!$table || !$field) {
             return [];
@@ -107,7 +116,7 @@ class EntityFilter
                         $items[] = $itemObjects->row();
                     }
                 }
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 Message::addError(
                     sprintf(
                         $GLOBALS['TL_LANG']['MSC']['tl_entity_filter']['invalidSqlQuery'],
@@ -120,10 +129,10 @@ class EntityFilter
             return $items;
         }
 
-        throw new \Exception("No 'table' set in $table.$field's eval array.");
+        throw new Exception("No 'table' set in $table.$field's eval array.");
     }
 
-    public function countItems(string $table, string $field, $activeRecord)
+    public function countItems(string $table, string $field, $activeRecord): int|false
     {
         if (!$table || !$field) {
             return false;
@@ -151,10 +160,10 @@ class EntityFilter
             return $items->count;
         }
 
-        throw new \Exception("No 'table' set in $table.$field's eval array.");
+        throw new Exception("No 'table' set in $table.$field's eval array.");
     }
 
-    public function getHeaderFields(DataContainer $dc, $widget)
+    public function getHeaderFields(DataContainer $dc, $widget): array
     {
         if (!($table = $dc->table) || !($strField = $dc->field)) {
             return [];
@@ -163,15 +172,15 @@ class EntityFilter
         Controller::loadDataContainer($table);
         System::loadLanguageFile($table);
 
-        $dca = $GLOBALS['TL_DCA'][$table]['fields'][$dc->field]['eval']['listWidget'];
+        $dca = $GLOBALS['TL_DCA'][$table]['fields'][$strField]['eval']['listWidget'];
 
         Controller::loadDataContainer($dca['table']);
         System::loadLanguageFile($dca['table']);
 
         $childDca = $GLOBALS['TL_DCA'][$dca['table']];
 
-        if (!isset($dca['fields']) || empty($dca['fields'])) {
-            throw new \Exception("No 'fields' set in $dc->table.$dc->field's eval array.");
+        if (empty($dca['fields'])) {
+            throw new Exception("No 'fields' set in $table.$strField's eval array.");
         }
 
         // add field labels
@@ -186,7 +195,7 @@ class EntityFilter
         );
     }
 
-    public function getFieldsAsOptions(DataContainer $dc)
+    public function getFieldsAsOptions(DataContainer $dc): array
     {
         if (!($table = $dc->table)) {
             return [];
@@ -201,7 +210,7 @@ class EntityFilter
                 return [];
             }
 
-            $fields = System::getContainer()->get('huh.utils.dca')->getFields($childTable);
+            $fields = System::getContainer()->get(Utils::class)->dca()->getDcaFields($childTable);
 
             // add table to field values
             return array_combine(
@@ -213,9 +222,9 @@ class EntityFilter
                 ),
                 array_values($fields)
             );
-        } else {
-            throw new \Exception("No 'table' set in $dc->table.$dc->field's eval array.");
         }
+
+        throw new Exception("No 'table' set in $dc->table.$dc->field's eval array.");
     }
 
     /**
@@ -224,7 +233,7 @@ class EntityFilter
      *
      * @return array Returns array($strCondition, $arrValues)
      */
-    public function computeSqlCondition(array $conditions, string $table)
+    public function computeSqlCondition(array $conditions, string $table): array
     {
         $condition = '';
         $values = [];
@@ -234,10 +243,11 @@ class EntityFilter
             $conditions[0]['connective'] = '';
         }
 
+        /** @var DatabaseUtilPolyfill $dbUtil */
+        $dbUtil = System::getContainer()->get(DatabaseUtilPolyfill::class);
+
         foreach ($conditions as $conditionArray) {
-            [
-                $clause, $clauseValues
-                ] = System::getContainer()->get('huh.utils.database')->computeCondition(
+            [$clause, $clauseValues] = $dbUtil->computeCondition(
                 $conditionArray['field'],
                 $conditionArray['operator'],
                 $conditionArray['value'],
@@ -260,7 +270,7 @@ class EntityFilter
      *
      * @return QueryBuilder
      */
-    public function computeQueryBuilderCondition(QueryBuilder $queryBuilder, array $conditions, string $table)
+    public function computeQueryBuilderCondition(QueryBuilder $queryBuilder, array $conditions, string $table): QueryBuilder
     {
         $condition = '';
 
@@ -269,11 +279,14 @@ class EntityFilter
             $conditions[0]['connective'] = '';
         }
 
+        /** @var DatabaseUtilPolyfill $dbUtil */
+        $dbUtil = System::getContainer()->get(DatabaseUtilPolyfill::class);
+
         foreach ($conditions as $conditionArray) {
             $field = str_replace($table.'.', '', $conditionArray['field']);
             $dca = $GLOBALS['TL_DCA'][$table]['fields'][$field] ?? null;
 
-            $where = System::getContainer()->get('huh.utils.database')->composeWhereForQueryBuilder($queryBuilder, $field, $conditionArray['operator'], $dca, $conditionArray['value']);
+            $where = $dbUtil->composeWhereForQueryBuilder($queryBuilder, $field, $conditionArray['operator'], $dca, $conditionArray['value']);
 
             $condition .= ' '.$conditionArray['connective'].' '.($conditionArray['bracketLeft'] ? '(' : '').$where
                 .($conditionArray['bracketRight'] ? ')' : '');
