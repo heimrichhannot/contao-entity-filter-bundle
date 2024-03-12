@@ -9,24 +9,27 @@
 namespace HeimrichHannot\EntityFilterBundle\Manager;
 
 use Contao\Controller;
-use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\System;
 
 class Manager
 {
-    /** @var ContaoFrameworkInterface */
-    protected $framework;
+    protected ContaoFramework $framework;
 
     /**
      * Constructor.
      */
-    public function __construct(ContaoFrameworkInterface $framework)
+    public function __construct(ContaoFramework $framework)
     {
         $this->framework = $framework;
     }
 
-    public static function addFilterToDca(string $name, string $parentTable, string $childTable, array $multiColumnEditorOverrides = [])
-    {
+    public static function addFilterToDca(
+        string $name,
+        string $parentTable,
+        string $childTable,
+        array  $multiColumnEditorOverrides = []
+    ): void {
         Controller::loadDataContainer($parentTable);
         Controller::loadDataContainer('tl_entity_filter');
         System::loadLanguageFile('tl_entity_filter');
@@ -54,8 +57,13 @@ class Manager
         ];
     }
 
-    public function addListToDca(string $name, string $parentTable, string $filterFieldname, string $childTable, array $fields = [])
-    {
+    public function addListToDca(
+        string $name,
+        string $parentTable,
+        string $filterFieldname,
+        string $childTable,
+        array $fields = []
+    ): void {
         Controller::loadDataContainer($parentTable);
         $dca = &$GLOBALS['TL_DCA'][$parentTable];
 
@@ -82,7 +90,7 @@ class Manager
         string $fieldname,
         array $optionsCallback = ['huh.field_value_copier.util.field_value_copier_util', 'getOptions'],
         array $config = []
-    ) {
+    ): void {
         Controller::loadDataContainer($parentTable);
         $dca = &$GLOBALS['TL_DCA'][$parentTable];
 

@@ -5,9 +5,11 @@ namespace HeimrichHannot\EntityFilterBundle\Util;
 use Contao\Controller;
 use Contao\CoreBundle\InsertTag\InsertTagParser;
 use Doctrine\DBAL\ArrayParameterType;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 
+/**
+ * @internal {@see https://github.com/heimrichhannot/contao-utils-bundle/blob/ee122d2e267a60aa3200ce0f40d92c22028988e8/src/Database/DatabaseUtil.php#L19}
+ */
 class DatabaseUtilPolyfill
 {
     const SQL_CONDITION_OR = 'OR';
