@@ -14,9 +14,6 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class HeimrichHannotContaoEntityFilterBundle extends Bundle
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getContainerExtension(): ExtensionInterface
     {
         return new EntityFilterExtension();
@@ -26,6 +23,4 @@ class HeimrichHannotContaoEntityFilterBundle extends Bundle
     {
         return \dirname(__DIR__);
     }
-
-
 }

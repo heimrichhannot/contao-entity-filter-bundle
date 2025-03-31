@@ -12,10 +12,18 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class ModifyEntityFilterQueryEvent extends Event
 {
-    const NAME = 'huh.entity_filter.event.modify_entity_filter_query_event';
+    public const NAME = 'huh.entity_filter.event.modify_entity_filter_query_event';
 
-    public function __construct(private readonly string $table, private readonly string $listTable, private readonly string $field, private $activeRecord, private string $query, private readonly string $where, private array $values, private readonly array $listDca)
-    {
+    public function __construct(
+        private readonly string $table,
+        private readonly string $listTable,
+        private readonly string $field,
+        private $activeRecord,
+        private string $query,
+        private readonly string $where,
+        private array $values,
+        private readonly array $listDca,
+    ) {
     }
 
     public function getTable(): string
@@ -28,9 +36,6 @@ class ModifyEntityFilterQueryEvent extends Event
         return $this->field;
     }
 
-    /**
-     * @return mixed
-     */
     public function getActiveRecord()
     {
         return $this->activeRecord;

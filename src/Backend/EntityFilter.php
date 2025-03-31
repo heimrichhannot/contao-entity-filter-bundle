@@ -23,14 +23,12 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EntityFilter
 {
-
     public function __construct(
         protected ContaoFramework $framework,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly Utils $utils,
         private readonly DatabaseHelper $databaseHelper,
-    )
-    {
+    ) {
     }
 
     public function getHeaderFieldsForDca(array $config, $context, DataContainer $dc)
@@ -73,7 +71,7 @@ class EntityFilter
                 $fields = '*';
             }
 
-            $query = 'SELECT '.$fields.' FROM '.$listDca['eval']['listWidget']['table'];
+            $query = 'SELECT ' . $fields . ' FROM ' . $listDca['eval']['listWidget']['table'];
 
             [$where, $values] = $this->computeSqlCondition(
                 StringUtil::deserialize($activeRecord->{$filter}, true),
@@ -84,7 +82,7 @@ class EntityFilter
             $items = [];
 
             try {
-                $query = $query.($where ? ' WHERE '.$where : '');
+                $query = $query . ($where ? ' WHERE ' . $where : '');
 
                 $event = $this->eventDispatcher->dispatch(
                     new ModifyEntityFilterQueryEvent(
@@ -141,7 +139,7 @@ class EntityFilter
             // build query
             $filter = $listDca['eval']['listWidget']['filterField'];
 
-            $query = 'SELECT COUNT(*) AS count FROM '.$listDca['eval']['listWidget']['table'];
+            $query = 'SELECT COUNT(*) AS count FROM ' . $listDca['eval']['listWidget']['table'];
 
             [$where, $values] = $this->computeSqlCondition(
                 StringUtil::deserialize($activeRecord->{$filter}, true),
@@ -150,7 +148,7 @@ class EntityFilter
 
             // get items
             $items = Database::getInstance()
-                ->prepare($query.($where ? ' WHERE '.$where : ''))
+                ->prepare($query . ($where ? ' WHERE ' . $where : ''))
                 ->execute($values);
 
             return $items->count;
@@ -183,7 +181,7 @@ class EntityFilter
         return array_combine(
             $dca['fields'],
             array_map(
-                fn($val) => $childDca['fields'][$val]['label'][0] ?: $val,
+                fn ($val) => $childDca['fields'][$val]['label'][0] ?: $val,
                 $dca['fields']
             )
         );
@@ -209,7 +207,7 @@ class EntityFilter
             // add table to field values
             return array_combine(
                 array_map(
-                    fn($val) => $childTable.'.'.$val,
+                    fn ($val) => $childTable . '.' . $val,
                     array_keys($fields)
                 ),
                 array_values($fields)
@@ -220,7 +218,7 @@ class EntityFilter
     }
 
     /**
-     * @param array        $conditions   The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
+     * @param array $conditions The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
      *
      * @return array Returns array($strCondition, $arrValues)
      */
@@ -234,8 +232,6 @@ class EntityFilter
             $conditions[0]['connective'] = '';
         }
 
-
-
         foreach ($conditions as $conditionArray) {
             [$clause, $clauseValues] = $this->databaseHelper->computeCondition(
                 $conditionArray['field'],
@@ -244,8 +240,8 @@ class EntityFilter
                 $table
             );
 
-            $condition .= ' '.$conditionArray['connective'].' '.($conditionArray['bracketLeft'] ? '(' : '').$clause
-                .($conditionArray['bracketRight'] ? ')' : '');
+            $condition .= ' ' . $conditionArray['connective'] . ' ' . ($conditionArray['bracketLeft'] ? '(' : '') . $clause
+                . ($conditionArray['bracketRight'] ? ')' : '');
 
             $values = array_merge($values, $clauseValues);
         }
@@ -270,7 +266,7 @@ class EntityFilter
         }
 
         foreach ($conditions as $conditionArray) {
-            $field = str_replace($table.'.', '', $conditionArray['field']);
+            $field = str_replace($table . '.', '', $conditionArray['field']);
             $dca = $GLOBALS['TL_DCA'][$table]['fields'][$field] ?? null;
 
             $where = $this->databaseHelper->composeWhereForQueryBuilder(
@@ -281,8 +277,8 @@ class EntityFilter
                 $conditionArray['value']
             );
 
-            $condition .= ' '.$conditionArray['connective'].' '.($conditionArray['bracketLeft'] ? '(' : '').$where
-                .($conditionArray['bracketRight'] ? ')' : '');
+            $condition .= ' ' . $conditionArray['connective'] . ' ' . ($conditionArray['bracketLeft'] ? '(' : '') . $where
+                . ($conditionArray['bracketRight'] ? ')' : '');
         }
 
         if (!empty($condition)) {

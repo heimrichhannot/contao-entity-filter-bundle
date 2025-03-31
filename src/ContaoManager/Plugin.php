@@ -16,9 +16,6 @@ use HeimrichHannot\EntityFilterBundle\HeimrichHannotContaoEntityFilterBundle;
 
 class Plugin implements BundlePluginInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getBundles(ParserInterface $parser): array
     {
         return [

@@ -9,27 +9,27 @@ use Doctrine\DBAL\Query\QueryBuilder;
 
 class DatabaseHelper
 {
-    const SQL_CONDITION_OR = 'OR';
-    const SQL_CONDITION_AND = 'AND';
+    public const SQL_CONDITION_OR = 'OR';
+    public const SQL_CONDITION_AND = 'AND';
 
-    const OPERATOR_LIKE = 'like';
-    const OPERATOR_UNLIKE = 'unlike';
-    const OPERATOR_EQUAL = 'equal';
-    const OPERATOR_UNEQUAL = 'unequal';
-    const OPERATOR_LOWER = 'lower';
-    const OPERATOR_LOWER_EQUAL = 'lowerequal';
-    const OPERATOR_GREATER = 'greater';
-    const OPERATOR_GREATER_EQUAL = 'greaterequal';
-    const OPERATOR_IN = 'in';
-    const OPERATOR_NOT_IN = 'notin';
-    const OPERATOR_IS_NULL = 'isnull';
-    const OPERATOR_IS_NOT_NULL = 'isnotnull';
-    const OPERATOR_IS_EMPTY = 'isempty';
-    const OPERATOR_IS_NOT_EMPTY = 'isnotempty';
-    const OPERATOR_REGEXP = 'regexp';
-    const OPERATOR_NOT_REGEXP = 'notregexp';
+    public const OPERATOR_LIKE = 'like';
+    public const OPERATOR_UNLIKE = 'unlike';
+    public const OPERATOR_EQUAL = 'equal';
+    public const OPERATOR_UNEQUAL = 'unequal';
+    public const OPERATOR_LOWER = 'lower';
+    public const OPERATOR_LOWER_EQUAL = 'lowerequal';
+    public const OPERATOR_GREATER = 'greater';
+    public const OPERATOR_GREATER_EQUAL = 'greaterequal';
+    public const OPERATOR_IN = 'in';
+    public const OPERATOR_NOT_IN = 'notin';
+    public const OPERATOR_IS_NULL = 'isnull';
+    public const OPERATOR_IS_NOT_NULL = 'isnotnull';
+    public const OPERATOR_IS_EMPTY = 'isempty';
+    public const OPERATOR_IS_NOT_EMPTY = 'isnotempty';
+    public const OPERATOR_REGEXP = 'regexp';
+    public const OPERATOR_NOT_REGEXP = 'notregexp';
 
-    const OPERATORS = [
+    public const OPERATORS = [
         self::OPERATOR_LIKE,
         self::OPERATOR_UNLIKE,
         self::OPERATOR_EQUAL,
@@ -50,15 +50,11 @@ class DatabaseHelper
 
     public function __construct(
         private readonly InsertTagParser $insertTagParser,
-    )
-    {
+    ) {
     }
 
     /**
      * Computes a MySQL condition appropriate for the given operator.
-     *
-     * @param mixed $value
-     * @param string $table
      *
      * @return array Returns array($strQuery, $arrValues)
      */
@@ -110,12 +106,12 @@ class DatabaseHelper
                 }
 
                 $pattern = '(' . implode(
-                        ',',
-                        array_map(
-                            fn($val) => '"' . addslashes(trim($val)) . '"',
-                            $value
-                        )
-                    ) . ')';
+                    ',',
+                    array_map(
+                        fn ($val) => '"' . addslashes(trim($val)) . '"',
+                        $value
+                    )
+                ) . ')';
 
                 break;
 
@@ -128,12 +124,12 @@ class DatabaseHelper
                 }
 
                 $pattern = '(' . implode(
-                        ',',
-                        array_map(
-                            fn($val) => '"' . addslashes(trim($val)) . '"',
-                            $value
-                        )
-                    ) . ')';
+                    ',',
+                    array_map(
+                        fn ($val) => '"' . addslashes(trim($val)) . '"',
+                        $value
+                    )
+                ) . ')';
 
                 break;
 
@@ -190,9 +186,9 @@ class DatabaseHelper
         };
     }
 
-    public function composeWhereForQueryBuilder(QueryBuilder $queryBuilder, string $field, string $operator, array $dca = null, $value = null): string
+    public function composeWhereForQueryBuilder(QueryBuilder $queryBuilder, string $field, string $operator, ?array $dca = null, $value = null): string
     {
-        $wildcard = ':'.str_replace('.', '_', $field);
+        $wildcard = ':' . str_replace('.', '_', $field);
         $wildcardParameterName = substr($wildcard, 1);
         $where = '';
 
@@ -204,13 +200,13 @@ class DatabaseHelper
         switch ($operator) {
             case self::OPERATOR_LIKE:
                 $where = $queryBuilder->expr()->like($field, $wildcard);
-                $queryBuilder->setParameter($wildcardParameterName, '%'.$this->insertTagParser->replaceInline(\is_array($value) ? implode(' ', $value) : $value).'%');
+                $queryBuilder->setParameter($wildcardParameterName, '%' . $this->insertTagParser->replaceInline(\is_array($value) ? implode(' ', $value) : $value) . '%');
 
                 break;
 
             case self::OPERATOR_UNLIKE:
                 $where = $queryBuilder->expr()->notLike($field, $wildcard);
-                $queryBuilder->setParameter($wildcardParameterName, '%'.$this->insertTagParser->replaceInline(\is_array($value) ? implode(' ', $value) : $value).'%');
+                $queryBuilder->setParameter($wildcardParameterName, '%' . $this->insertTagParser->replaceInline(\is_array($value) ? implode(' ', $value) : $value) . '%');
 
                 break;
 
@@ -259,7 +255,7 @@ class DatabaseHelper
                 } else {
                     $where = $queryBuilder->expr()->in($field, $wildcard);
                     $preparedValue = array_map(
-                        fn($val) => addslashes($this->insertTagParser->replaceInline(trim((string) $val))),
+                        fn ($val) => addslashes($this->insertTagParser->replaceInline(trim((string) $val))),
                         $value
                     );
                     $queryBuilder->setParameter($wildcardParameterName, $preparedValue, ArrayParameterType::STRING);
@@ -276,7 +272,7 @@ class DatabaseHelper
                 } else {
                     $where = $queryBuilder->expr()->notIn($field, $wildcard);
                     $preparedValue = array_map(
-                        fn($val) => addslashes($this->insertTagParser->replaceInline(trim((string) $val))),
+                        fn ($val) => addslashes($this->insertTagParser->replaceInline(trim((string) $val))),
                         $value
                     );
                     $queryBuilder->setParameter($wildcardParameterName, $preparedValue, ArrayParameterType::STRING);
@@ -306,7 +302,7 @@ class DatabaseHelper
 
             case self::OPERATOR_REGEXP:
             case self::OPERATOR_NOT_REGEXP:
-                $where = $field.(self::OPERATOR_NOT_REGEXP == $operator ? ' NOT REGEXP ' : ' REGEXP ').$wildcard;
+                $where = $field . (self::OPERATOR_NOT_REGEXP == $operator ? ' NOT REGEXP ' : ' REGEXP ') . $wildcard;
 
                 if (\is_array($dca) && isset($dca['eval']['multiple']) && $dca['eval']['multiple']) {
                     // match a serialized blob
@@ -314,16 +310,16 @@ class DatabaseHelper
                         // build a regexp alternative, e.g. (:"1";|:"2";)
                         $queryBuilder->setParameter(
                             $wildcardParameterName,
-                            '('.implode(
+                            '(' . implode(
                                 '|',
                                 array_map(
-                                    fn($val) => ':"'.$this->insertTagParser->replaceInline($val).'";',
+                                    fn ($val) => ':"' . $this->insertTagParser->replaceInline($val) . '";',
                                     $value
                                 )
-                            ).')'
+                            ) . ')'
                         );
                     } else {
-                        $queryBuilder->setParameter($wildcardParameterName, ':"'.$this->insertTagParser->replaceInline($value).'";');
+                        $queryBuilder->setParameter($wildcardParameterName, ':"' . $this->insertTagParser->replaceInline($value) . '";');
                     }
                 } else {
                     // TODO: this makes no sense, yet
