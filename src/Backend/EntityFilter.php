@@ -149,7 +149,9 @@ class EntityFilter
             );
 
             // get items
-            $items = Database::getInstance()->prepare($query.($where ? ' WHERE '.$where : ''))->execute($values);
+            $items = Database::getInstance()
+                ->prepare($query.($where ? ' WHERE '.$where : ''))
+                ->execute($values);
 
             return $items->count;
         }
@@ -219,11 +221,10 @@ class EntityFilter
 
     /**
      * @param array        $conditions   The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
-     * @param QueryBuilder $queryBuilder
      *
      * @return array Returns array($strCondition, $arrValues)
      */
-    public function computeSqlCondition(array $conditions, string $table)
+    public function computeSqlCondition(array $conditions, string $table): array
     {
         $condition = '';
         $values = [];

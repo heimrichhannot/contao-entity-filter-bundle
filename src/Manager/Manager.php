@@ -23,7 +23,7 @@ class Manager
 
     public static function addField(string $table): void
     {
-        $GLOBALS['TL_DCA'][$table]['config']['onload_callback']['entity_filter'] = static function () use ($table) {
+        $GLOBALS['TL_DCA'][$table]['config']['onload_callback']['entity_filter'] = static function () {
             $GLOBALS['TL_CSS']['entity_filter'] = '/bundles/heimrichhannotcontaoentityfilter/css/entity_filter.css';
         };
     }
