@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2025-03-31
+- Added: support for contao 5 ([#3](https://github.com/heimrichhannot/contao-entity-filter-bundle/pull/3))
+- Changed: dropped support for contao < 4.13 ([#3](https://github.com/heimrichhannot/contao-entity-filter-bundle/pull/3))
+- Changed: dropped support for php < 8.1 ([#3](https://github.com/heimrichhannot/contao-entity-filter-bundle/pull/3))
+- Removed: tl_entity_filter **(BC Break!)** ([#3](https://github.com/heimrichhannot/contao-entity-filter-bundle/pull/3))
+
 ## [1.10.0] - 2023-03-08
 - Changed: dropped contao < 4.9 support
 - Changed: dropped php < 7.4 support
