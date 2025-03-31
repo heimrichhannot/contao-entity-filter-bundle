@@ -26,7 +26,7 @@ class EntityFilter
 
     public function __construct(
         protected ContaoFramework $framework,
-        private EventDispatcherInterface $eventDispatcher,
+        private readonly EventDispatcherInterface $eventDispatcher,
         private readonly Utils $utils,
         private readonly DatabaseHelper $databaseHelper,
     )
@@ -181,9 +181,7 @@ class EntityFilter
         return array_combine(
             $dca['fields'],
             array_map(
-                function ($val) use ($childDca) {
-                    return $childDca['fields'][$val]['label'][0] ?: $val;
-                },
+                fn($val) => $childDca['fields'][$val]['label'][0] ?: $val,
                 $dca['fields']
             )
         );
@@ -209,9 +207,7 @@ class EntityFilter
             // add table to field values
             return array_combine(
                 array_map(
-                    function ($val) use ($childTable) {
-                        return $childTable.'.'.$val;
-                    },
+                    fn($val) => $childTable.'.'.$val,
                     array_keys($fields)
                 ),
                 array_values($fields)

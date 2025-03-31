@@ -80,7 +80,7 @@ class DatabaseHelper
 
         $dca = &$GLOBALS['TL_DCA'][$table]['fields'][$field];
 
-        if (isset($dca['sql']) && false !== stripos($dca['sql'], 'blob')) {
+        if (isset($dca['sql']) && false !== stripos((string) $dca['sql'], 'blob')) {
             $addQuotes = true;
         }
 
@@ -112,9 +112,7 @@ class DatabaseHelper
                 $pattern = '(' . implode(
                         ',',
                         array_map(
-                            function ($val) {
-                                return '"' . addslashes(trim($val)) . '"';
-                            },
+                            fn($val) => '"' . addslashes(trim($val)) . '"',
                             $value
                         )
                     ) . ')';
@@ -132,9 +130,7 @@ class DatabaseHelper
                 $pattern = '(' . implode(
                         ',',
                         array_map(
-                            function ($val) {
-                                return '"' . addslashes(trim($val)) . '"';
-                            },
+                            fn($val) => '"' . addslashes(trim($val)) . '"',
                             $value
                         )
                     ) . ')';
@@ -175,52 +171,23 @@ class DatabaseHelper
      */
     private function transformVerboseOperator(string $verboseOperator): string
     {
-        switch ($verboseOperator) {
-            case static::OPERATOR_LIKE:
-                return 'LIKE';
-
-            case static::OPERATOR_UNLIKE:
-                return 'NOT LIKE';
-
-            case static::OPERATOR_EQUAL:
-                return '=';
-
-            case static::OPERATOR_UNEQUAL:
-                return '!=';
-
-            case static::OPERATOR_LOWER:
-                return '<';
-
-            case static::OPERATOR_GREATER:
-                return '>';
-
-            case static::OPERATOR_LOWER_EQUAL:
-                return '<=';
-
-            case static::OPERATOR_GREATER_EQUAL:
-                return '>=';
-
-            case static::OPERATOR_IN:
-                return 'IN';
-
-            case static::OPERATOR_NOT_IN:
-                return 'NOT IN';
-
-            case static::OPERATOR_IS_NULL:
-                return 'IS NULL';
-
-            case static::OPERATOR_IS_NOT_NULL:
-                return 'IS NOT NULL';
-
-            case static::OPERATOR_IS_EMPTY:
-                return '=""';
-
-            case static::OPERATOR_IS_NOT_EMPTY:
-                return '!=""';
-        }
-
-        return '';
-
+        return match ($verboseOperator) {
+            static::OPERATOR_LIKE => 'LIKE',
+            static::OPERATOR_UNLIKE => 'NOT LIKE',
+            static::OPERATOR_EQUAL => '=',
+            static::OPERATOR_UNEQUAL => '!=',
+            static::OPERATOR_LOWER => '<',
+            static::OPERATOR_GREATER => '>',
+            static::OPERATOR_LOWER_EQUAL => '<=',
+            static::OPERATOR_GREATER_EQUAL => '>=',
+            static::OPERATOR_IN => 'IN',
+            static::OPERATOR_NOT_IN => 'NOT IN',
+            static::OPERATOR_IS_NULL => 'IS NULL',
+            static::OPERATOR_IS_NOT_NULL => 'IS NOT NULL',
+            static::OPERATOR_IS_EMPTY => '=""',
+            static::OPERATOR_IS_NOT_EMPTY => '!=""',
+            default => '',
+        };
     }
 
     public function composeWhereForQueryBuilder(QueryBuilder $queryBuilder, string $field, string $operator, array $dca = null, $value = null): string
@@ -230,7 +197,7 @@ class DatabaseHelper
         $where = '';
 
         // remove dot for table prefixes
-        if (false !== strpos($wildcard, '.')) {
+        if (str_contains($wildcard, '.')) {
             $wildcard = str_replace('.', '_', $wildcard);
         }
 
@@ -284,7 +251,7 @@ class DatabaseHelper
                 break;
 
             case self::OPERATOR_IN:
-                $value = array_filter(!\is_array($value) ? explode(',', $value) : $value);
+                $value = array_filter(!\is_array($value) ? explode(',', (string) $value) : $value);
 
                 // if empty add an unfulfillable condition in order to avoid an sql error
                 if (empty($value)) {
@@ -292,9 +259,7 @@ class DatabaseHelper
                 } else {
                     $where = $queryBuilder->expr()->in($field, $wildcard);
                     $preparedValue = array_map(
-                        function ($val) {
-                            return addslashes($this->insertTagParser->replaceInline(trim($val), false));
-                        },
+                        fn($val) => addslashes($this->insertTagParser->replaceInline(trim((string) $val))),
                         $value
                     );
                     $queryBuilder->setParameter($wildcardParameterName, $preparedValue, ArrayParameterType::STRING);
@@ -303,7 +268,7 @@ class DatabaseHelper
                 break;
 
             case self::OPERATOR_NOT_IN:
-                $value = array_filter(!\is_array($value) ? explode(',', $value) : $value);
+                $value = array_filter(!\is_array($value) ? explode(',', (string) $value) : $value);
 
                 // if empty add an unfulfillable condition in order to avoid an sql error
                 if (empty($value)) {
@@ -311,9 +276,7 @@ class DatabaseHelper
                 } else {
                     $where = $queryBuilder->expr()->notIn($field, $wildcard);
                     $preparedValue = array_map(
-                        function ($val) {
-                            return addslashes($this->insertTagParser->replaceInline(trim($val), false));
-                        },
+                        fn($val) => addslashes($this->insertTagParser->replaceInline(trim((string) $val))),
                         $value
                     );
                     $queryBuilder->setParameter($wildcardParameterName, $preparedValue, ArrayParameterType::STRING);
@@ -354,9 +317,7 @@ class DatabaseHelper
                             '('.implode(
                                 '|',
                                 array_map(
-                                    function ($val) {
-                                        return ':"'.$this->insertTagParser->replaceInline($val).'";';
-                                    },
+                                    fn($val) => ':"'.$this->insertTagParser->replaceInline($val).'";',
                                     $value
                                 )
                             ).')'

@@ -10,7 +10,6 @@ namespace HeimrichHannot\EntityFilterBundle\Manager;
 
 use Contao\Controller;
 use Contao\CoreBundle\Framework\ContaoFramework;
-use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
 use Contao\System;
 use HeimrichHannot\EntityFilterBundle\Helper\DatabaseHelper;
 
