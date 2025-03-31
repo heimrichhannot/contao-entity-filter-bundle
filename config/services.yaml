@@ -1,4 +1,8 @@
 services:
+    HeimrichHannot\EntityFilterBundle\:
+        resource: '../src/{Helper}/*'
+        autowire: true
+
     huh.entity_filter.backend.entity_filter:
         class: HeimrichHannot\EntityFilterBundle\Backend\EntityFilter
         public: true

@@ -17,17 +17,18 @@ use Contao\StringUtil;
 use Contao\System;
 use Doctrine\DBAL\Query\QueryBuilder;
 use HeimrichHannot\EntityFilterBundle\Event\ModifyEntityFilterQueryEvent;
+use HeimrichHannot\EntityFilterBundle\Helper\DatabaseHelper;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EntityFilter
 {
-    protected ContaoFramework $framework;
-    private EventDispatcherInterface $eventDispatcher;
-
-    public function __construct(ContaoFramework $framework, EventDispatcherInterface $eventDispatcher)
-    {
-        $this->framework = $framework;
-        $this->eventDispatcher = $eventDispatcher;
+    public function __construct(
+        protected ContaoFramework $framework,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly Utils $utils,
+        private readonly DatabaseHelper $databaseHelper,
+    ) {
     }
 
     public function getHeaderFieldsForDca(array $config, $context, DataContainer $dc)
@@ -70,7 +71,7 @@ class EntityFilter
                 $fields = '*';
             }
 
-            $query = 'SELECT '.$fields.' FROM '.$listDca['eval']['listWidget']['table'];
+            $query = 'SELECT ' . $fields . ' FROM ' . $listDca['eval']['listWidget']['table'];
 
             [$where, $values] = $this->computeSqlCondition(
                 StringUtil::deserialize($activeRecord->{$filter}, true),
@@ -81,7 +82,7 @@ class EntityFilter
             $items = [];
 
             try {
-                $query = $query.($where ? ' WHERE '.$where : '');
+                $query = $query . ($where ? ' WHERE ' . $where : '');
 
                 $event = $this->eventDispatcher->dispatch(
                     new ModifyEntityFilterQueryEvent(
@@ -138,7 +139,7 @@ class EntityFilter
             // build query
             $filter = $listDca['eval']['listWidget']['filterField'];
 
-            $query = 'SELECT COUNT(*) AS count FROM '.$listDca['eval']['listWidget']['table'];
+            $query = 'SELECT COUNT(*) AS count FROM ' . $listDca['eval']['listWidget']['table'];
 
             [$where, $values] = $this->computeSqlCondition(
                 StringUtil::deserialize($activeRecord->{$filter}, true),
@@ -146,7 +147,9 @@ class EntityFilter
             );
 
             // get items
-            $items = Database::getInstance()->prepare($query.($where ? ' WHERE '.$where : ''))->execute($values);
+            $items = Database::getInstance()
+                ->prepare($query . ($where ? ' WHERE ' . $where : ''))
+                ->execute($values);
 
             return $items->count;
         }
@@ -178,9 +181,7 @@ class EntityFilter
         return array_combine(
             $dca['fields'],
             array_map(
-                function ($val) use ($childDca) {
-                    return $childDca['fields'][$val]['label'][0] ?: $val;
-                },
+                fn ($val) => $childDca['fields'][$val]['label'][0] ?: $val,
                 $dca['fields']
             )
         );
@@ -201,14 +202,12 @@ class EntityFilter
                 return [];
             }
 
-            $fields = System::getContainer()->get('huh.utils.dca')->getFields($childTable);
+            $fields = $this->utils->dca()->getDcaFields($childTable);
 
             // add table to field values
             return array_combine(
                 array_map(
-                    function ($val) use ($childTable) {
-                        return $childTable.'.'.$val;
-                    },
+                    fn ($val) => $childTable . '.' . $val,
                     array_keys($fields)
                 ),
                 array_values($fields)
@@ -219,12 +218,11 @@ class EntityFilter
     }
 
     /**
-     * @param array        $conditions   The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
-     * @param QueryBuilder $queryBuilder
+     * @param array $conditions The array containing arrays of the form ['field' => 'name', 'operator' => '=', 'value' => 'value']
      *
      * @return array Returns array($strCondition, $arrValues)
      */
-    public function computeSqlCondition(array $conditions, string $table)
+    public function computeSqlCondition(array $conditions, string $table): array
     {
         $condition = '';
         $values = [];
@@ -235,17 +233,15 @@ class EntityFilter
         }
 
         foreach ($conditions as $conditionArray) {
-            [
-                $clause, $clauseValues
-                ] = System::getContainer()->get('huh.utils.database')->computeCondition(
+            [$clause, $clauseValues] = $this->databaseHelper->computeCondition(
                 $conditionArray['field'],
                 $conditionArray['operator'],
                 $conditionArray['value'],
                 $table
             );
 
-            $condition .= ' '.$conditionArray['connective'].' '.($conditionArray['bracketLeft'] ? '(' : '').$clause
-                .($conditionArray['bracketRight'] ? ')' : '');
+            $condition .= ' ' . $conditionArray['connective'] . ' ' . ($conditionArray['bracketLeft'] ? '(' : '') . $clause
+                . ($conditionArray['bracketRight'] ? ')' : '');
 
             $values = array_merge($values, $clauseValues);
         }
@@ -270,13 +266,19 @@ class EntityFilter
         }
 
         foreach ($conditions as $conditionArray) {
-            $field = str_replace($table.'.', '', $conditionArray['field']);
+            $field = str_replace($table . '.', '', $conditionArray['field']);
             $dca = $GLOBALS['TL_DCA'][$table]['fields'][$field] ?? null;
 
-            $where = System::getContainer()->get('huh.utils.database')->composeWhereForQueryBuilder($queryBuilder, $field, $conditionArray['operator'], $dca, $conditionArray['value']);
+            $where = $this->databaseHelper->composeWhereForQueryBuilder(
+                $queryBuilder,
+                $field,
+                $conditionArray['operator'],
+                $dca,
+                $conditionArray['value']
+            );
 
-            $condition .= ' '.$conditionArray['connective'].' '.($conditionArray['bracketLeft'] ? '(' : '').$where
-                .($conditionArray['bracketRight'] ? ')' : '');
+            $condition .= ' ' . $conditionArray['connective'] . ' ' . ($conditionArray['bracketLeft'] ? '(' : '') . $where
+                . ($conditionArray['bracketRight'] ? ')' : '');
         }
 
         if (!empty($condition)) {
