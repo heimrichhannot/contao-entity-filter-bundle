@@ -17,17 +17,20 @@ use Contao\StringUtil;
 use Contao\System;
 use Doctrine\DBAL\Query\QueryBuilder;
 use HeimrichHannot\EntityFilterBundle\Event\ModifyEntityFilterQueryEvent;
+use HeimrichHannot\EntityFilterBundle\Helper\DatabaseHelper;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EntityFilter
 {
-    protected ContaoFramework $framework;
-    private EventDispatcherInterface $eventDispatcher;
 
-    public function __construct(ContaoFramework $framework, EventDispatcherInterface $eventDispatcher)
+    public function __construct(
+        protected ContaoFramework $framework,
+        private EventDispatcherInterface $eventDispatcher,
+        private readonly Utils $utils,
+        private readonly DatabaseHelper $databaseHelper,
+    )
     {
-        $this->framework = $framework;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function getHeaderFieldsForDca(array $config, $context, DataContainer $dc)
@@ -201,7 +204,7 @@ class EntityFilter
                 return [];
             }
 
-            $fields = System::getContainer()->get('huh.utils.dca')->getFields($childTable);
+            $fields = $this->utils->dca()->getDcaFields($childTable);
 
             // add table to field values
             return array_combine(
@@ -234,10 +237,10 @@ class EntityFilter
             $conditions[0]['connective'] = '';
         }
 
+
+
         foreach ($conditions as $conditionArray) {
-            [
-                $clause, $clauseValues
-                ] = System::getContainer()->get('huh.utils.database')->computeCondition(
+            [$clause, $clauseValues] = $this->databaseHelper->computeCondition(
                 $conditionArray['field'],
                 $conditionArray['operator'],
                 $conditionArray['value'],
@@ -273,7 +276,13 @@ class EntityFilter
             $field = str_replace($table.'.', '', $conditionArray['field']);
             $dca = $GLOBALS['TL_DCA'][$table]['fields'][$field] ?? null;
 
-            $where = System::getContainer()->get('huh.utils.database')->composeWhereForQueryBuilder($queryBuilder, $field, $conditionArray['operator'], $dca, $conditionArray['value']);
+            $where = $this->databaseHelper->composeWhereForQueryBuilder(
+                $queryBuilder,
+                $field,
+                $conditionArray['operator'],
+                $dca,
+                $conditionArray['value']
+            );
 
             $condition .= ' '.$conditionArray['connective'].' '.($conditionArray['bracketLeft'] ? '(' : '').$where
                 .($conditionArray['bracketRight'] ? ')' : '');

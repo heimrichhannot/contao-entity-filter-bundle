@@ -10,3 +10,7 @@ services:
         public: true
         arguments:
             - "@contao.framework"
+
+    HeimrichHannot\EntityFilterBundle\Helper\:
+        resource: '../../Helper/*'
+        autowire: true
