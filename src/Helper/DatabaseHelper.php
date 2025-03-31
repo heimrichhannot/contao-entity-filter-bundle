@@ -5,11 +5,13 @@ namespace HeimrichHannot\EntityFilterBundle\Helper;
 use Contao\Controller;
 use Contao\CoreBundle\InsertTag\InsertTagParser;
 use Doctrine\DBAL\ArrayParameterType;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 
 class DatabaseHelper
 {
+    const SQL_CONDITION_OR = 'OR';
+    const SQL_CONDITION_AND = 'AND';
+
     const OPERATOR_LIKE = 'like';
     const OPERATOR_UNLIKE = 'unlike';
     const OPERATOR_EQUAL = 'equal';
@@ -26,6 +28,25 @@ class DatabaseHelper
     const OPERATOR_IS_NOT_EMPTY = 'isnotempty';
     const OPERATOR_REGEXP = 'regexp';
     const OPERATOR_NOT_REGEXP = 'notregexp';
+
+    const OPERATORS = [
+        self::OPERATOR_LIKE,
+        self::OPERATOR_UNLIKE,
+        self::OPERATOR_EQUAL,
+        self::OPERATOR_UNEQUAL,
+        self::OPERATOR_LOWER,
+        self::OPERATOR_LOWER_EQUAL,
+        self::OPERATOR_GREATER,
+        self::OPERATOR_GREATER_EQUAL,
+        self::OPERATOR_IN,
+        self::OPERATOR_NOT_IN,
+        self::OPERATOR_IS_NULL,
+        self::OPERATOR_IS_NOT_NULL,
+        self::OPERATOR_IS_EMPTY,
+        self::OPERATOR_IS_NOT_EMPTY,
+        self::OPERATOR_REGEXP,
+        self::OPERATOR_NOT_REGEXP,
+    ];
 
     public function __construct(
         private readonly InsertTagParser $insertTagParser,

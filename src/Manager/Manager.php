@@ -9,26 +9,28 @@
 namespace HeimrichHannot\EntityFilterBundle\Manager;
 
 use Contao\Controller;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
 use Contao\System;
+use HeimrichHannot\EntityFilterBundle\Helper\DatabaseHelper;
 
 class Manager
 {
-    /** @var ContaoFrameworkInterface */
-    protected $framework;
-
-    /**
-     * Constructor.
-     */
-    public function __construct(ContaoFrameworkInterface $framework)
+    public function __construct(
+        protected ContaoFramework $framework
+    )
     {
-        $this->framework = $framework;
     }
 
-    public static function addFilterToDca(string $name, string $parentTable, string $childTable, array $multiColumnEditorOverrides = [])
+    public static function addField(string $table): void
     {
-        Controller::loadDataContainer($parentTable);
-        Controller::loadDataContainer('tl_entity_filter');
+        $GLOBALS['TL_DCA'][$table]['config']['onload_callback']['entity_filter'] = static function () use ($table) {
+            $GLOBALS['TL_CSS']['entity_filter'] = '/bundles/heimrichhannotcontaoentityfilter/css/entity_filter.css';
+        };
+    }
+
+    public static function addFilterToDca(string $name, string $parentTable, string $childTable, array $multiColumnEditorOverrides = []): void
+    {
         System::loadLanguageFile('tl_entity_filter');
         $dca = &$GLOBALS['TL_DCA'][$parentTable];
 
@@ -36,7 +38,7 @@ class Manager
             [
                 'minRowCount' => 0,
                 'class' => 'entity-filter',
-                'fields' => $GLOBALS['TL_DCA']['tl_entity_filter']['fields'],
+                'fields' => static::fields(),
                 'table' => $childTable,
             ],
             $multiColumnEditorOverrides
@@ -54,9 +56,8 @@ class Manager
         ];
     }
 
-    public function addListToDca(string $name, string $parentTable, string $filterFieldname, string $childTable, array $fields = [])
+    public function addListToDca(string $name, string $parentTable, string $filterFieldName, string $childTable, array $fields = []): void
     {
-        Controller::loadDataContainer($parentTable);
         $dca = &$GLOBALS['TL_DCA'][$parentTable];
 
         $dca['fields'][$name] = [
@@ -67,7 +68,7 @@ class Manager
                 'listWidget' => [
                     'items_callback' => ['huh.entity_filter.backend.entity_filter', 'getItemsForDca'],
                     'header_fields_callback' => ['huh.entity_filter.backend.entity_filter', 'getHeaderFieldsForDca'],
-                    'filterField' => $filterFieldname,
+                    'filterField' => $filterFieldName,
                     'fields' => $fields,
                     'table' => $childTable,
                 ],
@@ -82,7 +83,8 @@ class Manager
         string $fieldname,
         array $optionsCallback = ['huh.field_value_copier.util.field_value_copier_util', 'getOptions'],
         array $config = []
-    ) {
+    ): void
+    {
         Controller::loadDataContainer($parentTable);
         $dca = &$GLOBALS['TL_DCA'][$parentTable];
 
@@ -96,6 +98,51 @@ class Manager
                     'options_callback' => $optionsCallback,
                     'config' => $config,
                 ],
+            ],
+        ];
+    }
+
+    public static function fields(): array
+    {
+        return [
+            'connective'     => [
+                'label'     => &$GLOBALS['TL_LANG']['tl_entity_filter']['connective'],
+                'inputType' => 'select',
+                'options'   => [
+                    DatabaseHelper::SQL_CONDITION_OR,
+                    DatabaseHelper::SQL_CONDITION_AND
+                ],
+                'reference' => &$GLOBALS['TL_LANG']['MSC']['connectives'],
+                'eval'      => ['tl_class' => 'w50', 'groupStyle' => 'width: 65px', 'includeBlankOption' => true],
+            ],
+            'bracketLeft'  => [
+                'label'     => &$GLOBALS['TL_LANG']['tl_entity_filter']['bracketLeft'],
+                'inputType' => 'checkbox',
+                'eval'      => ['tl_class' => 'w50'],
+            ],
+            'field'        => [
+                'label'            => &$GLOBALS['TL_LANG']['tl_entity_filter']['field'],
+                'inputType'        => 'select',
+                'options_callback' => ['huh.entity_filter.backend.entity_filter', 'getFieldsAsOptions'],
+                'eval'             => ['tl_class' => 'w50', 'chosen' => true, 'includeBlankOption' => true, 'mandatory' => true, 'groupStyle' => 'width: 350px'],
+            ],
+            'operator'     => [
+                'label'     => &$GLOBALS['TL_LANG']['tl_entity_filter']['operator'],
+                'inputType' => 'select',
+                'options'   => DatabaseHelper::OPERATORS,
+                'reference' => &$GLOBALS['TL_LANG']['MSC']['databaseOperators'],
+                'eval'      => ['tl_class' => 'w50', 'groupStyle' => 'width: 115px'],
+            ],
+            'value'        => [
+                'label'     => &$GLOBALS['TL_LANG']['tl_entity_filter']['value'],
+                'inputType' => 'text',
+                'eval'      => ['maxlength' => 255, 'tl_class' => 'w50', 'groupStyle' => 'width: 250px'],
+                'sql'       => "varchar(255) NOT NULL default ''",
+            ],
+            'bracketRight' => [
+                'label'     => &$GLOBALS['TL_LANG']['tl_entity_filter']['bracketRight'],
+                'inputType' => 'checkbox',
+                'eval'      => ['tl_class' => 'w50'],
             ],
         ];
     }
