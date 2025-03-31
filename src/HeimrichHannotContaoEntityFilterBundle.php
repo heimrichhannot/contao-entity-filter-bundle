@@ -9,6 +9,7 @@
 namespace HeimrichHannot\EntityFilterBundle;
 
 use HeimrichHannot\EntityFilterBundle\DependencyInjection\EntityFilterExtension;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class HeimrichHannotContaoEntityFilterBundle extends Bundle
@@ -16,8 +17,15 @@ class HeimrichHannotContaoEntityFilterBundle extends Bundle
     /**
      * {@inheritdoc}
      */
-    public function getContainerExtension()
+    public function getContainerExtension(): ExtensionInterface
     {
         return new EntityFilterExtension();
     }
+
+    public function getPath(): string
+    {
+        return \dirname(__DIR__);
+    }
+
+
 }
