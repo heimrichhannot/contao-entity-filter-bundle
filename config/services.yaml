@@ -6,9 +6,7 @@ services:
     huh.entity_filter.backend.entity_filter:
         class: HeimrichHannot\EntityFilterBundle\Backend\EntityFilter
         public: true
-        arguments:
-            - "@contao.framework"
-            - "@event_dispatcher"
+        autowire: true
     huh.entity_filter.manager:
         class: HeimrichHannot\EntityFilterBundle\Manager\Manager
         public: true

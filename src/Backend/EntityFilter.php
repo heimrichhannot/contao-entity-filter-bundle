@@ -187,7 +187,7 @@ class EntityFilter
         );
     }
 
-    public function getFieldsAsOptions(DataContainer $dc)
+    public function getFieldsAsOptions(DataContainer $dc): array
     {
         if (!($table = $dc->table)) {
             return [];
@@ -208,7 +208,7 @@ class EntityFilter
             return array_combine(
                 array_map(
                     fn ($val) => $childTable . '.' . $val,
-                    array_keys($fields)
+                    array_values($fields)
                 ),
                 array_values($fields)
             );

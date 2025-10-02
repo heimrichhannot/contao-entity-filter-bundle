@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.1] - 2025-10-02
+- Fixed: exception in backend due service definition
+- Fixed: query generator issues
+
 ## [2.0.0] - 2025-03-31
 - Added: support for contao 5 ([#3](https://github.com/heimrichhannot/contao-entity-filter-bundle/pull/3))
 - Changed: dropped support for contao < 4.13 ([#3](https://github.com/heimrichhannot/contao-entity-filter-bundle/pull/3))
